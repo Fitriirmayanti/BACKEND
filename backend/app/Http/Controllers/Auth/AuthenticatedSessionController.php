@@ -1,0 +1,108 @@
+<?php
+
+namespace App\Http\Controllers\Auth;
+
+use App\Http\Controllers\Controller;
+use App\Http\Requests\Auth\LoginRequest;
+use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\View\View;
+
+
+class AuthenticatedSessionController extends Controller
+{
+    /**
+     * Display the login view.
+     */
+    public function create(): View
+    {
+        return view('auth.login');
+    }
+
+    /**
+     * Handle an incoming authentication request.
+     */
+    public function store(LoginRequest $request)
+    {
+        $request->authenticate();
+
+        $request->session()->regenerate();
+
+        $user = $request->user();
+
+        // Jika request dari API (expects JSON), kembalikan JSON agar tidak redirect (hindari CORS)
+        if ($request->expectsJson()) {
+            return response()->json([
+                'message' => 'Login berhasil',
+                'role' => $user->role,
+                'user' => [
+                    'id' => $user->id,
+                    'name' => $user->name,
+                    'email' => $user->email,
+                ],
+            ]);
+        }
+
+        if ($user->role === 'admin_lapangan') {
+        return redirect()->route('admin_lapangan');
+        } elseif ($user->role === 'admin_pusat') {
+        return redirect()->route('admin_pusat');
+        }
+
+
+        // Jika role tidak dikenali, logout dan kembali ke login dengan error
+        auth()->logout();
+        $request->session()->invalidate();
+        $request->session()->regenerateToken();
+
+        return redirect()
+            ->route('login')
+            ->withErrors(['email' => 'Akun Anda tidak memiliki akses.']);
+    }
+
+    /**
+     * Destroy an authenticated session.
+     */
+    public function destroy(Request $request): RedirectResponse
+    {
+        Auth::guard('web')->logout();
+
+        $request->session()->invalidate();
+
+        $request->session()->regenerateToken();
+
+        return redirect('login');
+    }
+
+    /**
+     * Handle API login and always return JSON without redirects.
+     */
+    public function storeApi(Request $request)
+    {
+        $credentials = $request->only('email', 'password');
+
+        if (!Auth::attempt($credentials)) {
+            return response()->json([
+                'status' => 401,
+                'message' => 'Login gagal',
+                'data' => null
+            ], 401);
+        }
+
+        $user = Auth::user();
+
+        return response()->json([
+            'status' => 200,
+            'message' => 'success',
+            'data' => [
+                'role' => $user->role,
+                'user' => [
+                    'id' => $user->id,
+                    'name' => $user->name,
+                    'email' => $user->email,
+                ]
+            ]
+        ], 200);
+    }
+}

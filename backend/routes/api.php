@@ -111,7 +111,7 @@ Route::middleware(['api'])->group(function () {
     Route::post('/auth/reset-password', [NewPasswordController::class, 'store'])->name('api.password.store');
 });
 
-Route::middleware(['web','auth'])->group(function () {
+Route::middleware(['api'])->group(function () {
     Route::get('/auth/verify-email', EmailVerificationPromptController::class)->name('api.verification.notice');
     Route::get('/auth/verify-email/{id}/{hash}', VerifyEmailController::class)->middleware(['signed', 'throttle:6,1'])->name('api.verification.verify');
     Route::post('/auth/email/verification-notification', [EmailVerificationNotificationController::class, 'store'])->middleware('throttle:6,1')->name('api.verification.send');

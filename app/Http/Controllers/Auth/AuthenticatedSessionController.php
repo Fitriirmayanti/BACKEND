@@ -7,8 +7,9 @@ use App\Http\Requests\Auth\LoginRequest;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\View\View;
-
+use App\Models\User;
 
 class AuthenticatedSessionController extends Controller
 {
@@ -78,24 +79,30 @@ class AuthenticatedSessionController extends Controller
     /**
      * Handle API login and always return JSON without redirects.
      */
-    public function storeApi(Request $request)
+   public function storeApi(Request $request)
     {
-        $credentials = $request->only('email', 'password');
+        $request->validate([
+            'email' => 'required|email',
+            'password' => 'required'
+        ]);
 
-        if (!Auth::attempt($credentials)) {
+        $user = User::where('email', $request->email)->first();
+
+        if (!$user || !Hash::check($request->password, $user->password)) {
             return response()->json([
                 'status' => 401,
-                'message' => 'Login gagal',
-                'data' => null
+                'message' => 'Login gagal'
             ], 401);
         }
 
-        $user = Auth::user();
+        // 🔥 INI KUNCINYA (BUAT TOKEN)
+        $token = $user->createToken('auth_token')->plainTextToken;
 
         return response()->json([
             'status' => 200,
             'message' => 'success',
             'data' => [
+                'token' => $token,
                 'role' => $user->role,
                 'user' => [
                     'id' => $user->id,
@@ -103,6 +110,7 @@ class AuthenticatedSessionController extends Controller
                     'email' => $user->email,
                 ]
             ]
-        ], 200);
+        ]);
     }
+
 }

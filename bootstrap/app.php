@@ -12,12 +12,16 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware): void {
+
+        // ❌ HAPUS EnsureFrontendRequestsAreStateful (tidak perlu untuk API token)
+
+        // middleware custom kamu
         $middleware->alias([
-        'role' => \App\Http\Middleware\RoleMiddleware::class,
-        'guest-role' => \App\Http\Middleware\RedirectIfAuthenticatedWithRole::class,
-    ]);
-        
-        // Enable CORS middleware
+            'role' => \App\Http\Middleware\RoleMiddleware::class,
+            'guest-role' => \App\Http\Middleware\RedirectIfAuthenticatedWithRole::class,
+        ]);
+
+        // CORS
         $middleware->append(\Illuminate\Http\Middleware\HandleCors::class);
     })
     ->withExceptions(function (Exceptions $exceptions): void {

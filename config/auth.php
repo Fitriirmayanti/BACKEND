@@ -40,6 +40,11 @@ return [
             'driver' => 'session',
             'provider' => 'users',
         ],
+
+        'api' => [
+        'driver' => 'sanctum', // 🔥 INI PENTING BANGET
+        'provider' => 'users',
+        ],
     ],
 
     /*

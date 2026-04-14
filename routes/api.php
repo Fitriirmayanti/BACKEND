@@ -498,7 +498,7 @@ Route::middleware(['web','auth', 'role:admin_lapangan'])->group(function () {
 });
 
 // admin_pusat APIs (read-only mirrors), protected with same middleware + web session
-Route::middleware(['web','auth', 'role:admin_pusat'])->group(function () {
+Route::middleware(['auth:sanctum', 'role:admin_pusat'])->group(function () {
     Route::get('/admin_pusat/dashboard', function () {
         $customer = Customer::count();
         $awal = date('Y-m-01');
@@ -529,9 +529,15 @@ Route::middleware(['web','auth', 'role:admin_pusat'])->group(function () {
         ]);
     })->name('admin_pusat.dashboard');
 
-    Route::get('/admin_pusat/galeri', function () {
-        return response()->json(Galeri::orderBy('id', 'desc')->get());
-    })->name('admin_pusat.galeri.index');
+   // Route::get('/admin_pusat/galeri', function () {
+      //  return response()->json(Galeri::orderBy('id', 'desc')->get());
+   // })->name('admin_pusat.galeri.index');
+   Route::middleware('auth:sanctum')->get('/test-galeri', function (Request $request) {
+    return response()->json([
+        'user' => $request->user(), // 🔥 CEK USER KEDETECT ATAU TIDAK
+        'data' => Galeri::orderBy('id', 'desc')->get()
+    ]);
+});
 
     Route::post('/admin_pusat/galeri', function (Request $request) {
         $request->validate([
@@ -553,6 +559,11 @@ Route::middleware(['web','auth', 'role:admin_pusat'])->group(function () {
 
         return response()->json($galeri, 201);
     })->name('admin_pusat.galeri.store');
+    
+    Route::get('/admin_pusat/galeri', function () {
+        return response()->json(Galeri::orderBy('id', 'desc')->get());
+    });
+
 
     Route::post('/admin_pusat/galeri/{id}', function (Request $request, $id) {
         $galeri = Galeri::findOrFail($id);

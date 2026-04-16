@@ -15,15 +15,26 @@ class LaporanKonservasiController extends Controller
     {
         $daerahFilter = $request->query('daerah');
         $laporanQuery = LaporanKonservasi::with('user');
+
         if ($daerahFilter) {
             $laporanQuery->where('daerahLokasi', $daerahFilter);
         }
+
         $laporan = $laporanQuery->get();
 
         $daerah = LaporanKonservasi::select('daerahLokasi')
             ->distinct()
             ->pluck('daerahLokasi');
 
+        // 🔥 INI TAMBAHAN UNTUK API
+        if ($request->expectsJson()) {
+            return response()->json([
+                'data' => $laporan,
+                'daerah' => $daerah
+            ]);
+        }
+
+        // 🔥 INI TETAP UNTUK WEB (JANGAN DIHAPUS)
         return view('admin_pusat.laporan.index', [
             'title' => 'Laporan Konservasi',
             'active' => 'Index',
@@ -42,17 +53,87 @@ class LaporanKonservasiController extends Controller
 
     public function store(Request $request)
     {
-        //
-    }
+        dd($request->input('keterangan'));
+        $request->validate([
+            'judulLaporan' => 'required',
+            'jenisKegiatan' => 'required',
+            'tanggalMulai' => 'required|date',
+            'tanggalSelesai' => 'required|date',
+            'daerahLokasi' => 'required',
+            'keterangan' => 'required',
+            'suratTugas' => 'required|file|mimes:jpeg,png,jpg,webp,pdf,doc,docx',
+        ]);
 
+        if (!file_exists(public_path('uploads/laporan'))) {
+            mkdir(public_path('uploads/laporan'), 0777, true);
+        }
+        
+        $data = [
+            'judulLaporan' => $request->judulLaporan,
+            'jenisKegiatan' => $request->jenisKegiatan,
+            'tanggalMulai' => $request->tanggalMulai,
+            'tanggalSelesai' => $request->tanggalSelesai,
+            'daerahLokasi' => $request->daerahLokasi,
+            'kabupaten' => $request->kabupaten,
+            'kecamatan' => $request->kecamatan,
+            'latitude' => $request->latitude,
+            'longitude' => $request->longitude,
+            'luasArea' => $request->luasArea,
+            'keterangan' => $request->input('keterangan'),
+            'status' => 0,
+            'pengirim' => auth()->id() ?? 1, // 🔥 FIX DI SINI
+        ];
 
-    public function show(string $id)
-    {
-        $laporan = LaporanKonservasi::with('user')->find($id);
-        if (!$laporan) {
-            return redirect()->route('admin_pusat.laporanKonservasi.index')->with('error', 'Laporan tidak ditemukan.');
+        if ($request->hasFile('suratTugas')) {
+            $file = time().'_'.$request->file('suratTugas')->getClientOriginalName();
+            $request->file('suratTugas')->move(public_path('uploads/laporan'), $file);
+            $data['suratTugas'] = $file;
         }
 
+        if ($request->hasFile('fotoSebelum')) {
+            $file = time().'_'.$request->file('fotoSebelum')->getClientOriginalName();
+            $request->file('fotoSebelum')->move(public_path('uploads/laporan'), $file);
+            $data['fotoSebelum'] = $file;
+        }
+
+        if ($request->hasFile('fotoSetelah')) {
+            $file = time().'_'.$request->file('fotoSetelah')->getClientOriginalName();
+            $request->file('fotoSetelah')->move(public_path('uploads/laporan'), $file);
+            $data['fotoSetelah'] = $file;
+        }
+
+        $laporan = LaporanKonservasi::create($data);
+
+        return response()->json([
+            'message' => 'Berhasil disimpan',
+            'data' => $laporan
+        ], 201);
+    }
+
+    public function show(Request $request, string $id)
+    {
+        $laporan = LaporanKonservasi::with('user')->find($id);
+
+        // 🔥 HANDLE KALAU DATA TIDAK ADA
+        if (!$laporan) {
+
+            if ($request->expectsJson()) {
+                return response()->json([
+                    'message' => 'Laporan tidak ditemukan'
+                ], 404);
+            }
+
+            return redirect()
+                ->route('admin_pusat.laporanKonservasi.index')
+                ->with('error', 'Laporan tidak ditemukan.');
+        }
+
+        // 🔥 MODE API
+        if ($request->expectsJson()) {
+            return response()->json($laporan);
+        }
+
+        // 🔥 MODE WEB (TETAP DIPAKAI)
         return view('admin_pusat.laporan.detail', [
             'title' => 'Laporan Konservasi',
             'active' => 'Detail',
@@ -74,7 +155,7 @@ class LaporanKonservasiController extends Controller
     }
 
 
-    public function destroy(string $id)
+    public function destroy(Request $request, string $id)
     {
         $laporan = LaporanKonservasi::findOrFail($id);
 
@@ -95,10 +176,16 @@ class LaporanKonservasiController extends Controller
 
         $laporan->delete();
 
+        // 🔥 MODE API
+        if ($request->expectsJson()) {
+            return response()->json([
+                'message' => 'Laporan berhasil dihapus'
+            ]);
+        }
+
+        // 🔥 MODE WEB
         return redirect()->back()->with('success', 'Laporan dan file terkait berhasil dihapus.');
     }
-
-
 
     public function setujui($id)
     {

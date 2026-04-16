@@ -181,178 +181,162 @@ Route::middleware(['web','auth', 'role:admin_lapangan'])->group(function () {
     })->name('admin_lapangan.laporanKonservasi.show');
 
 
-    Route::post('/admin_pusat/laporan-konservasi', [LaporanKonservasiController::class, 'store']);
-    //Route::post('/admin_lapangan/laporanKonservasi', function (Request $request) {
-        //$user = auth()->user();
-        
-        // Debug: Log what we received
-      //  \Log::info('=== DEBUGGING LAPORAN SUBMISSION ===');
-       // \Log::info('Request files:', $request->allFiles());
-        
-       // if ($request->hasFile('suratTugas')) {
-           // $files = $request->file('suratTugas');
-           // $count = is_array($files) ? count($files) : 1;
-       //     \Log::info('suratTugas files count: ' . $count);
-     //   }
-        
-      //  if ($request->hasFile('fotoSebelum')) {
-         //   $files = $request->file('fotoSebelum');
-         //   $count = is_array($files) ? count($files) : 1;
-          //  \Log::info('fotoSebelum files count: ' . $count);
-      //  }
-        
-     //   if ($request->hasFile('fotoSetelah')) {
-      //      $files = $request->file('fotoSetelah');
-      //      $count = is_array($files) ? count($files) : 1;
-       //      \Log::info('fotoSetelah files count: ' . $count);
-       //      \Log::info('fotoSetelah files count: ' . $count);
-        // }
-        
-       //  $request->validate([
-        //     'judulLaporan'   => 'required|string|max:255',
-        //     'jenisKegiatan'  => 'required|string|max:255',
-        //     'tanggalMulai'   => 'required|date',
-        //     'tanggalSelesai' => 'required|date|after_or_equal:tanggalMulai',
-        //     'keterangan'     => 'nullable|string',
-        //     'daerahLokasi'   => 'required|string|max:255',
-        //     'kabupaten'      => 'required|string|max:255',
-        //     'kecamatan'      => 'required|string|max:255',
-        //     'latitude'       => 'required',
-         //    'longitude'      => 'required',
-        //     'luasArea'       => 'required|numeric|min:0',
-        //     'suratTugas'     => 'required',
-         //    'fotoSebelum'    => 'required',
-         //    'fotoSetelah'    => 'required',
-      //   ]);
+    
+   Route::post('/admin_lapangan/laporanKonservasi', function (Request $request) {
 
-        // Additional validation for files
-      //   if ($request->hasFile('suratTugas')) {
-       //      $files = $request->file('suratTugas');
-        //     if (!is_array($files)) $files = [$files];
-        //     foreach ($files as $file) {
-        //         if (!$file->isValid() || !in_array($file->getClientOriginalExtension(), ['jpg', 'jpeg', 'png', 'webp', 'pdf']) || $file->getSize() > 2048000) {
-        //             throw new \Exception('Invalid file for suratTugas');
-         //        }
-       //      }
-      //   }
+            $user = auth()->user();
 
-       //  if ($request->hasFile('fotoSebelum')) {
-        //     $files = $request->file('fotoSebelum');
-        //     if (!is_array($files)) $files = [$files];
-        //     foreach ($files as $file) {
-         //        if (!$file->isValid() || !in_array($file->getClientOriginalExtension(), ['jpg', 'jpeg', 'png', 'webp', 'pdf']) || $file->getSize() > 2048000) {
-         //            throw new \Exception('Invalid file for fotoSebelum');
-        //         }
-       //     }
-       //  }
+            // Debug log
+            \Log::info('=== DEBUGGING LAPORAN SUBMISSION ===');
+            \Log::info('Request files:', $request->allFiles());
 
-      //   if ($request->hasFile('fotoSetelah')) {
-         //    $files = $request->file('fotoSetelah');
-         //    if (!is_array($files)) $files = [$files];
-         //    foreach ($files as $file) {
-         //        if (!$file->isValid() || !in_array($file->getClientOriginalExtension(), ['jpg', 'jpeg', 'png', 'webp', 'pdf']) || $file->getSize() > 2048000) {
-         //            throw new \Exception('Invalid file for fotoSetelah');
-         //        }
-          //   }
-       //  }
+            if ($request->hasFile('suratTugas')) {
+                $files = $request->file('suratTugas');
+                $count = is_array($files) ? count($files) : 1;
+                \Log::info('suratTugas files count: ' . $count);
+            }
 
-        // Create upload directory if it doesn't exist
-       //  $uploadPath = public_path('uploads/laporan');
-       //  if (!file_exists($uploadPath)) {
-        //     mkdir($uploadPath, 0777, true);
-     //    }
+            if ($request->hasFile('fotoSebelum')) {
+                $files = $request->file('fotoSebelum');
+                $count = is_array($files) ? count($files) : 1;
+                \Log::info('fotoSebelum files count: ' . $count);
+            }
 
-        // Handle multiple file uploads
-     //    $suratTugasNames = [];
-     //    $fotoSebelumNames = [];
-     //    $fotoSetelahNames = [];
+            if ($request->hasFile('fotoSetelah')) {
+                $files = $request->file('fotoSetelah');
+                $count = is_array($files) ? count($files) : 1;
+                \Log::info('fotoSetelah files count: ' . $count);
+            }
 
-        // Upload Surat Tugas files
-     //    $suratTugasFiles = [];
-        // Check for array format first (suratTugas[0], suratTugas[1], etc.)
-     //    $index = 0;
-     //    while ($request->hasFile("suratTugas.{$index}")) {
-      //       $suratTugasFiles[] = $request->file("suratTugas.{$index}");
-     //        $index++;
-      //   }
-        // If no array format found, check for single file or direct array
-    //     if (empty($suratTugasFiles) && $request->hasFile('suratTugas')) {
-      //       $files = $request->file('suratTugas');
-      //       $suratTugasFiles = is_array($files) ? $files : [$files];
-      //   }
-        
-      //   \Log::info('suratTugas files found: ' . count($suratTugasFiles));
-       //  foreach ($suratTugasFiles as $index => $file) {
-        //     $fileName = time() . '_surat_' . $index . '_' . Str::random(5) . '.' . $file->getClientOriginalExtension();
-      //       \Log::info('Uploading suratTugas file: ' . $fileName);
-       //      $file->move($uploadPath, $fileName);
-       //      $suratTugasNames[] = $fileName;
-      //   }
-      //   \Log::info('Final suratTugasNames:', $suratTugasNames);
+            $request->validate([
+                'judulLaporan'   => 'required|string|max:255',
+                'jenisKegiatan'  => 'required|string|max:255',
+                'tanggalMulai'   => 'required|date',
+                'tanggalSelesai' => 'required|date|after_or_equal:tanggalMulai',
+                'keterangan'     => 'nullable|string',
+                'daerahLokasi'   => 'required|string|max:255',
+                'kabupaten'      => 'required|string|max:255',
+                'kecamatan'      => 'required|string|max:255',
+                'latitude'       => 'required',
+                'longitude'      => 'required',
+                'luasArea'       => 'required|numeric|min:0',
+                'suratTugas'     => 'required',
+                'fotoSebelum'    => 'required',
+                'fotoSetelah'    => 'required',
+            ]);
 
-        // Upload Foto Sebelum files
-      //   $fotoSebelumFiles = [];
-      //   $index = 0;
-     //    while ($request->hasFile("fotoSebelum.{$index}")) {
-      //       $fotoSebelumFiles[] = $request->file("fotoSebelum.{$index}");
-      //       $index++;
-      //   }
-       //  if (empty($fotoSebelumFiles) && $request->hasFile('fotoSebelum')) {
-       //      $files = $request->file('fotoSebelum');
-       //      $fotoSebelumFiles = is_array($files) ? $files : [$files];
-       //  }
-        
-      //   \Log::info('fotoSebelum files found: ' . count($fotoSebelumFiles));
-      //   foreach ($fotoSebelumFiles as $index => $file) {
-       // // //      $fileName = time() . '_sebelum_' . $index . '_' . Str::random(5) . '.' . $file->getClientOriginalExtension();
-       //      \Log::info('Uploading fotoSebelum file: ' . $fileName);
-        //     $file->move($uploadPath, $fileName);
-       //      $fotoSebelumNames[] = $fileName;
-       //  }
+            // Additional validation for files
+            if ($request->hasFile('suratTugas')) {
+                $files = $request->file('suratTugas');
+                if (!is_array($files)) $files = [$files];
 
-        // Upload Foto Setelah files
-      //   $fotoSetelahFiles = [];
-      //   $index = 0;
-      //   while ($request->hasFile("fotoSetelah.{$index}")) {
-       //      $fotoSetelahFiles[] = $request->file("fotoSetelah.{$index}");
-       //      $index++;
-      //   }
-      //   if (empty($fotoSetelahFiles) && $request->hasFile('fotoSetelah')) {
-       //      $files = $request->file('fotoSetelah');
-       //      $fotoSetelahFiles = is_array($files) ? $files : [$files];
-      //   }
-        
-      //   \Log::info('fotoSetelah files found: ' . count($fotoSetelahFiles));
-      //   foreach ($fotoSetelahFiles as $index => $file) {
-       //      $fileName = time() . '_setelah_' . $index . '_' . Str::random(5) . '.' . $file->getClientOriginalExtension();
-       //      \Log::info('Uploading fotoSetelah file: ' . $fileName);
-       //      $file->move($uploadPath, $fileName);
-       //      $fotoSetelahNames[] = $fileName;
-        // }
+                foreach ($files as $file) {
+                    if (
+                        !$file->isValid() ||
+                        !in_array($file->getClientOriginalExtension(), ['jpg', 'jpeg', 'png', 'webp', 'pdf']) ||
+                        $file->getSize() > 2048000
+                    ) {
+                        throw new \Exception('Invalid file for suratTugas');
+                    }
+                }
+            }
 
-      // //   $laporan = LaporanKonservasi::create([
-          // //   'pengirim'       => $user->id,
-          //   'judulLaporan'   => $request->judulLaporan,
-          //   'jenisKegiatan'  => $request->jenisKegiatan,
-          //   'tanggalMulai'   => $request->tanggalMulai,
-          //   'tanggalSelesai' => $request->tanggalSelesai,
-          //   'keterangan'     => $request->keterangan,
-          //   'daerahLokasi'   => $request->daerahLokasi,
-          //   'kabupaten'      => $request->kabupaten,
-          //   'kecamatan'      => $request->kecamatan,
-          //   'latitude'       => $request->latitude,
-         //    'longitude'      => $request->longitude,
-         //    'luasArea'       => $request->luasArea,
-         //    'suratTugas'     => json_encode($suratTugasNames),
-         //    'fotoSebelum'    => json_encode($fotoSebelumNames),
-         //    'fotoSetelah'    => json_encode($fotoSetelahNames),
-         //    'status'         => 0, // default pending
-     //    ]);
+            if ($request->hasFile('fotoSebelum')) {
+                $files = $request->file('fotoSebelum');
+                if (!is_array($files)) $files = [$files];
 
-      //   return response()->json($laporan, 201);
-   // })->name('admin_lapangan.laporanKonservasi.store');
+                foreach ($files as $file) {
+                    if (
+                        !$file->isValid() ||
+                        !in_array($file->getClientOriginalExtension(), ['jpg', 'jpeg', 'png', 'webp', 'pdf']) ||
+                        $file->getSize() > 2048000
+                    ) {
+                        throw new \Exception('Invalid file for fotoSebelum');
+                    }
+                }
+            }
+
+            if ($request->hasFile('fotoSetelah')) {
+                $files = $request->file('fotoSetelah');
+                if (!is_array($files)) $files = [$files];
+
+                foreach ($files as $file) {
+                    if (
+                        !$file->isValid() ||
+                        !in_array($file->getClientOriginalExtension(), ['jpg', 'jpeg', 'png', 'webp', 'pdf']) ||
+                        $file->getSize() > 2048000
+                    ) {
+                        throw new \Exception('Invalid file for fotoSetelah');
+                    }
+                }
+            }
+
+            // Create upload directory if it doesn't exist
+            $uploadPath = public_path('uploads/laporan');
+            if (!file_exists($uploadPath)) {
+                mkdir($uploadPath, 0777, true);
+            }
+
+            // Handle multiple file uploads
+            $suratTugasNames = [];
+            $fotoSebelumNames = [];
+            $fotoSetelahNames = [];
+
+            // Upload Surat Tugas
+            $files = $request->file('suratTugas');
+            if (!is_array($files)) $files = [$files];
+
+            foreach ($files as $index => $file) {
+                $fileName = time() . '_surat_' . $index . '_' . Str::random(5) . '.' . $file->getClientOriginalExtension();
+                $file->move($uploadPath, $fileName);
+                $suratTugasNames[] = $fileName;
+            }
+
+            // Upload Foto Sebelum
+            $files = $request->file('fotoSebelum');
+            if (!is_array($files)) $files = [$files];
+
+            foreach ($files as $index => $file) {
+                $fileName = time() . '_sebelum_' . $index . '_' . Str::random(5) . '.' . $file->getClientOriginalExtension();
+                $file->move($uploadPath, $fileName);
+                $fotoSebelumNames[] = $fileName;
+            }
+
+            // Upload Foto Setelah
+            $files = $request->file('fotoSetelah');
+            if (!is_array($files)) $files = [$files];
+
+            foreach ($files as $index => $file) {
+                $fileName = time() . '_setelah_' . $index . '_' . Str::random(5) . '.' . $file->getClientOriginalExtension();
+                $file->move($uploadPath, $fileName);
+                $fotoSetelahNames[] = $fileName;
+            }
+
+            $laporan = LaporanKonservasi::create([
+                'pengirim'       => $user->id,
+                'judulLaporan'   => $request->judulLaporan,
+                'jenisKegiatan'  => $request->jenisKegiatan,
+                'tanggalMulai'   => $request->tanggalMulai,
+                'tanggalSelesai' => $request->tanggalSelesai,
+                'keterangan'     => $request->keterangan,
+                'daerahLokasi'   => $request->daerahLokasi,
+                'kabupaten'      => $request->kabupaten,
+                'kecamatan'      => $request->kecamatan,
+                'latitude'       => $request->latitude,
+                'longitude'      => $request->longitude,
+                'luasArea'       => $request->luasArea,
+                'suratTugas'     => json_encode($suratTugasNames),
+                'fotoSebelum'    => json_encode($fotoSebelumNames),
+                'fotoSetelah'    => json_encode($fotoSetelahNames),
+                'status'         => 0,
+            ]);
+
+            return response()->json($laporan, 201);
+
+        })->name('admin_lapangan.laporanKonservasi.store');
 
     Route::put('/admin_lapangan/laporanKonservasi/{id}', function (Request $request, $id) {
+
         $user = auth()->user();
         $laporan = LaporanKonservasi::where('pengirim', $user->id)->findOrFail($id);
 
@@ -368,10 +352,13 @@ Route::middleware(['web','auth', 'role:admin_lapangan'])->group(function () {
             'latitude'       => 'required',
             'longitude'      => 'required',
             'luasArea'       => 'required|numeric|min:0',
+
             'suratTugas'     => 'nullable|array',
             'suratTugas.*'   => 'file|mimes:jpg,jpeg,png,webp,pdf|max:2048',
+
             'fotoSebelum'    => 'nullable|array',
             'fotoSebelum.*'  => 'file|mimes:jpg,jpeg,png,webp,pdf|max:2048',
+
             'fotoSetelah'    => 'nullable|array',
             'fotoSetelah.*'  => 'file|mimes:jpg,jpeg,png,webp,pdf|max:2048',
         ]);
@@ -399,9 +386,12 @@ Route::middleware(['web','auth', 'role:admin_lapangan'])->group(function () {
 
         // Handle multiple file uploads if new files are provided
         foreach (['suratTugas', 'fotoSebelum', 'fotoSetelah'] as $field) {
+
             if ($request->hasFile($field)) {
+
                 // Delete old files if exist
                 $oldFiles = json_decode($laporan->$field, true) ?? [];
+
                 foreach ($oldFiles as $oldFileName) {
                     $oldFile = public_path('uploads/laporan/' . $oldFileName);
                     if (file_exists($oldFile)) {
@@ -411,11 +401,13 @@ Route::middleware(['web','auth', 'role:admin_lapangan'])->group(function () {
 
                 // Upload new files
                 $newFileNames = [];
+
                 foreach ($request->file($field) as $index => $file) {
                     $newName = time() . '_' . $field . '_' . $index . '_' . Str::random(5) . '.' . $file->getClientOriginalExtension();
                     $file->move($uploadPath, $newName);
                     $newFileNames[] = $newName;
                 }
+
                 $updateData[$field] = json_encode($newFileNames);
             }
         }
@@ -423,6 +415,7 @@ Route::middleware(['web','auth', 'role:admin_lapangan'])->group(function () {
         $laporan->update($updateData);
 
         return response()->json($laporan);
+
     })->name('admin_lapangan.laporanKonservasi.update');
 
     Route::delete('/admin_lapangan/laporanKonservasi/{id}', function ($id) {
@@ -1137,93 +1130,65 @@ Route::middleware(['web','auth', 'role:admin_lapangan'])->group(function () {
         return response()->json(['message' => 'Standar pelayanan berhasil dihapus']);
     })->name('admin_pusat.standar-pelayanan.destroy');
 
-    Route::middleware(['auth:sanctum'])->group(function () {
-        Route::get('/admin_pusat/laporan-konservasi', function (Request $request) {
-            $daerahFilter = $request->query('daerah');
-            $laporanQuery = LaporanKonservasi::with('user');
-            if ($daerahFilter) {
-                $laporanQuery->where('daerahLokasi', $daerahFilter);
-            }
-            $laporan = $laporanQuery->orderBy('id', 'desc')->get();
+Route::post('/admin_pusat/laporan-konservasi', function (Illuminate\Http\Request $request) {
 
-            $daerah = LaporanKonservasi::select('daerahLokasi')
-                ->distinct()
-                ->pluck('daerahLokasi');
+    $request->validate([
+        'judulLaporan' => 'required|string|max:255',
+        'jenisKegiatan' => 'required|string|max:255',
+        'tanggalMulai' => 'required|date',
+        'tanggalSelesai' => 'required|date',
+        'daerahLokasi' => 'required|string|max:255',
+        'kabupaten' => 'required|string|max:255',
+        'kecamatan' => 'required|string|max:255',
+        'latitude' => 'required',
+        'longitude' => 'required',
+        'luasArea' => 'required|numeric',
+        'keterangan' => 'nullable|string',
 
-            return response()->json([
-                'data' => $laporan,
-                'daerah' => $daerah,
-            ]);
-        })->name('admin_pusat.laporan-konservasi.index');
+        'suratTugas' => 'required|file|mimes:jpg,jpeg,png,webp,pdf,doc,docx',
+        'fotoSebelum' => 'required|file|mimes:jpg,jpeg,png,webp',
+        'fotoSetelah' => 'required|file|mimes:jpg,jpeg,png,webp',
+    ]);
 
-        Route::get('/admin_pusat/laporan-konservasi/daerah', function () {
-            $daerah = LaporanKonservasi::select('daerahLokasi')
-                ->distinct()
-                ->pluck('daerahLokasi');
-            return response()->json($daerah);
-        })->name('admin_pusat.laporan-konservasi.daerah');
+    // folder upload
+    $path = public_path('uploads/laporan');
+    if (!file_exists($path)) {
+        mkdir($path, 0777, true);
+    }
 
-        Route::get('/admin_pusat/laporan-konservasi/{id}', function ($id) {
-            $laporan = LaporanKonservasi::with('user')->findOrFail($id);
-            return response()->json($laporan);
-        })->name('admin_pusat.laporan-konservasi.show');
+    // upload file
+    $surat = time().'_surat.'.$request->file('suratTugas')->getClientOriginalExtension();
+    $sebelum = time().'_sebelum.'.$request->file('fotoSebelum')->getClientOriginalExtension();
+    $setelah = time().'_setelah.'.$request->file('fotoSetelah')->getClientOriginalExtension();
 
-        Route::post('/admin_pusat/laporan-konservasi', function (Request $request) {
-            $request->validate([
-                'judulLaporan' => 'required|string|max:255',
-                'jenisKegiatan' => 'required|string|max:255',
-                'tanggalMulai' => 'required|date',
-                'tanggalSelesai' => 'required|date|after_or_equal:tanggalMulai',
-                'keterangan' => 'nullable|string',
-                'daerahLokasi' => 'required|string|max:255',
-                'kabupaten' => 'required|string|max:255',
-                'kecamatan' => 'required|string|max:255',
-                'lokasiKegiatan' => 'nullable|string|max:255',
-                'latitude' => 'required|string|max:50',
-                'longitude' => 'required|string|max:50',
-                'luasArea' => 'required|string|max:50',
-                'suratTugas' => 'required|file|mimes:jpeg,png,jpg,webp,pdf,doc,docx|max:2048',
-                'fotoSebelum' => 'required|file|mimes:jpeg,png,jpg,webp|max:2048',
-                'fotoSetelah' => 'required|file|mimes:jpeg,png,jpg,webp|max:2048',
-            ]);
+    $request->file('suratTugas')->move($path, $surat);
+    $request->file('fotoSebelum')->move($path, $sebelum);
+    $request->file('fotoSetelah')->move($path, $setelah);
 
-            // Create upload directory if it doesn't exist
-            $uploadPath = public_path('uploads/laporan');
-            if (!file_exists($uploadPath)) {
-                mkdir($uploadPath, 0777, true);
-            }
+    // simpan ke DB
+    $data = \App\Models\LaporanKonservasi::create([
+        'pengirim' => 1, // sementara fix biar tidak error auth
+        'judulLaporan' => $request->judulLaporan,
+        'jenisKegiatan' => $request->jenisKegiatan,
+        'tanggalMulai' => $request->tanggalMulai,
+        'tanggalSelesai' => $request->tanggalSelesai,
+        'keterangan' => $request->input('keterangan') ?: '-',
+        'daerahLokasi' => $request->daerahLokasi,
+        'kabupaten' => $request->kabupaten,
+        'kecamatan' => $request->kecamatan,
+        'latitude' => $request->latitude,
+        'longitude' => $request->longitude,
+        'luasArea' => $request->luasArea,
+        'suratTugas' => $surat,
+        'fotoSebelum' => $sebelum,
+        'fotoSetelah' => $setelah,
+        'status' => 0,
+    ]);
 
-            // Handle file uploads
-            $suratTugasName = time() . '_surat_' . Str::random(5) . '.' . $request->suratTugas->getClientOriginalExtension();
-            $fotoSebelumName = time() . '_sebelum_' . Str::random(5) . '.' . $request->fotoSebelum->getClientOriginalExtension();
-            $fotoSetelahName = time() . '_setelah_' . Str::random(5) . '.' . $request->fotoSetelah->getClientOriginalExtension();
+    return response()->json($data, 201);
 
-            $request->suratTugas->move($uploadPath, $suratTugasName);
-            $request->fotoSebelum->move($uploadPath, $fotoSebelumName);
-            $request->fotoSetelah->move($uploadPath, $fotoSetelahName);
+});
 
-            $laporan = LaporanKonservasi::create([
-                'pengirim' => auth()->user()->id ?? null,
-                'judulLaporan' => $request->judulLaporan,
-                'jenisKegiatan' => $request->jenisKegiatan,
-                'tanggalMulai' => $request->tanggalMulai,
-                'tanggalSelesai' => $request->tanggalSelesai,
-                'keterangan' => $request->keterangan,
-                'daerahLokasi' => $request->daerahLokasi,
-                'kabupaten' => $request->kabupaten,
-                'kecamatan' => $request->kecamatan,
-                'lokasiKegiatan' => $request->lokasiKegiatan,
-                'latitude' => $request->latitude,
-                'longitude' => $request->longitude,
-                'luasArea' => $request->luasArea,
-                'suratTugas' => $suratTugasName,
-                'fotoSebelum' => $fotoSebelumName,
-                'fotoSetelah' => $fotoSetelahName,
-                'status' => 0, // default pending
-            ]);
-
-            return response()->json($laporan, 201);
-        })->name('admin_pusat.laporan-konservasi.store');
 
         Route::put('/admin_pusat/laporan-konservasi/{id}', function (Request $request, $id) {
             $laporan = LaporanKonservasi::findOrFail($id);
@@ -1325,4 +1290,3 @@ Route::middleware(['web','auth', 'role:admin_lapangan'])->group(function () {
     
             })->name('admin_pusat.laporan-konservasi.destroy');
     
-});

@@ -33,49 +33,54 @@ class ProgramController extends Controller
     public function store(Request $request)
     {
         $validated = $request->validate([
-            'judul'         => 'required|string|max:255',
-            'deskripsi'    => 'required|string',
-            'foto'         => 'required|image|mimes:jpeg,png,jpg,webp|max:2048',
-            'galeri.*'  => 'nullable|image|mimes:jpeg,png,jpg,webp|max:2048',
+            'judul'      => 'required|string|max:255',
+            'deskripsi'  => 'required|string',
+            'foto'       => 'required|image|mimes:jpeg,png,jpg,webp|max:2048',
+            'galeri.*'   => 'nullable|image|mimes:jpeg,png,jpg,webp|max:2048',
         ]);
 
-        // Simpan foto
-        $fotoName = time() . '.' . $request->foto->extension();
-        $request->foto->move(public_path('uploads/edukasi'), $fotoName);
+        // Simpan foto utama
+        $fotoName = time() . '.' . $request->file('foto')->extension();
+        $request->file('foto')->move(public_path('uploads/edukasi'), $fotoName);
 
         $keygaleri = Str::random(8);
 
-        // Slug unik
+        // Buat slug unik
         $slug = Str::slug($validated['judul']);
         if (Edukasi::where('slug', $slug)->exists()) {
             $slug .= '-' . Str::random(5);
         }
 
-        Edukasi::create([
-            'judul'         => $validated['judul'],
-            'slug'         => $slug,
-            'deskripsi'    => $validated['deskripsi'],
-            'kategori'  => 'Program',
-            'foto'         => $fotoName,
-            'keygaleri'    => $keygaleri,
+        // Simpan data program
+        $program = Edukasi::create([
+            'judul'      => $validated['judul'],
+            'slug'       => $slug,
+            'deskripsi'  => $validated['deskripsi'],
+            'kategori'   => 'Program',
+            'foto'       => $fotoName,
+            'keygaleri'  => $keygaleri,
         ]);
 
+        // Simpan galeri (jika ada)
         if ($request->hasFile('galeri')) {
             foreach ($request->file('galeri') as $galeriFile) {
                 $galeriName = uniqid() . '.' . $galeriFile->extension();
                 $galeriFile->move(public_path('uploads/galeri'), $galeriName);
 
                 Galeri::create([
-                    'judul' => $validated['judul'],
-                    'keterangan' => $validated['judul'],
-                    'gambar'    => $galeriName,
-                    'keygaleri'    => $keygaleri,
+                    'judul'       => $validated['judul'],
+                    'keterangan'  => $validated['judul'],
+                    'gambar'      => $galeriName,
+                    'keygaleri'   => $keygaleri,
                 ]);
             }
         }
 
-        return redirect()->route('admin_pusat.program.index')
-            ->with('success', 'Program berhasil ditambahkan.');
+        // ✅ RETURN JSON (INI YANG PENTING)
+        return response()->json([
+            'message' => 'Program berhasil ditambahkan',
+            'data' => $program
+        ], 201);
     }
 
 

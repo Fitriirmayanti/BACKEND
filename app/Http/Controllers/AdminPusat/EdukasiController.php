@@ -174,4 +174,14 @@ class EdukasiController extends Controller
 
         return redirect()->route('admin_pusat.edukasi.index')->with('success', 'Data edukasi berhasil dihapus.');
     }
+
+    public function apiEdukasi()
+    {
+        $data = Edukasi::all()->map(function ($item) {
+            $item->foto = url('uploads/edukasi/' . $item->foto);
+            return $item;
+        });
+
+        return response()->json($data);
+    }
 }

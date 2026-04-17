@@ -36,9 +36,20 @@ Route::middleware('api')->group(function () {
     });
 
     Route::get('/edukasi', function (Request $request) {
-        $kategori = $request->query('kategori') ?: 'Program';
-        $items = Edukasi::where('kategori', $kategori)->orderBy('id', 'desc')->get();
-        return response()->json(['kategori' => $kategori, 'items' => $items]);
+    $kategori = $request->query('kategori') ?: 'Program';
+
+    $items = Edukasi::where('kategori', $kategori)
+        ->orderBy('id', 'desc')
+        ->get()
+        ->map(function ($item) {
+            $item->foto = url('uploads/edukasi/' . $item->foto);
+            return $item;
+        });
+
+    return response()->json([
+        'kategori' => $kategori,
+        'items' => $items
+    ]);
     });
 
     Route::get('/edukasi/{slug}', function (string $slug) {
@@ -1096,21 +1107,34 @@ Route::middleware(['web','auth', 'role:admin_lapangan'])->group(function () {
     })->name('admin_pusat.standar-pelayanan.index');
 
     Route::post('/admin_pusat/standar-pelayanan', function (Request $request) {
+
         $request->validate([
             'judul' => 'required|string|max:255',
             'deskripsi' => 'nullable|string',
             'kategori' => 'required|string|max:255',
+            'foto' => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
         ]);
+
+        // upload foto
+        if ($request->hasFile('foto')) {
+            $file = $request->file('foto');
+            $filename = time() . '.' . $file->getClientOriginalExtension();
+            $file->move(public_path('uploads/edukasi'), $filename);
+        } else {
+            $filename = null;
+        }
 
         $edukasi = Edukasi::create([
             'judul' => $request->judul,
             'slug' => Str::slug($request->judul),
             'deskripsi' => $request->deskripsi,
             'kategori' => $request->kategori,
+            'foto' => $filename,
+            'keygaleri' => Str::random(8), // 🔥 INI WAJIB
         ]);
 
         return response()->json($edukasi, 201);
-    })->name('admin_pusat.standar-pelayanan.store');
+    });
 
     Route::match(['put', 'post'], '/admin_pusat/standar-pelayanan/{id}', function (Request $request, $id) {
         $edukasi = Edukasi::findOrFail($id);
@@ -1130,64 +1154,68 @@ Route::middleware(['web','auth', 'role:admin_lapangan'])->group(function () {
         return response()->json(['message' => 'Standar pelayanan berhasil dihapus']);
     })->name('admin_pusat.standar-pelayanan.destroy');
 
-Route::post('/admin_pusat/laporan-konservasi', function (Illuminate\Http\Request $request) {
+    Route::get('/admin_pusat/laporan-konservasi', function () {
+    return response()->json(\App\Models\LaporanKonservasi::latest()->get());
+    });
+    
+    Route::post('/admin_pusat/laporan-konservasi', function (Illuminate\Http\Request $request) {
 
-    $request->validate([
-        'judulLaporan' => 'required|string|max:255',
-        'jenisKegiatan' => 'required|string|max:255',
-        'tanggalMulai' => 'required|date',
-        'tanggalSelesai' => 'required|date',
-        'daerahLokasi' => 'required|string|max:255',
-        'kabupaten' => 'required|string|max:255',
-        'kecamatan' => 'required|string|max:255',
-        'latitude' => 'required',
-        'longitude' => 'required',
-        'luasArea' => 'required|numeric',
-        'keterangan' => 'nullable|string',
+        $request->validate([
+            'judulLaporan' => 'required|string|max:255',
+            'jenisKegiatan' => 'required|string|max:255',
+            'tanggalMulai' => 'required|date',
+            'tanggalSelesai' => 'required|date',
+            'daerahLokasi' => 'required|string|max:255',
+            'kabupaten' => 'required|string|max:255',
+            'kecamatan' => 'required|string|max:255',
+            'latitude' => 'required',
+            'longitude' => 'required',
+            'luasArea' => 'required|numeric',
+            'keterangan' => 'nullable|string',
 
-        'suratTugas' => 'required|file|mimes:jpg,jpeg,png,webp,pdf,doc,docx',
-        'fotoSebelum' => 'required|file|mimes:jpg,jpeg,png,webp',
-        'fotoSetelah' => 'required|file|mimes:jpg,jpeg,png,webp',
-    ]);
+            'suratTugas' => 'required|file|mimes:jpg,jpeg,png,webp,pdf,doc,docx',
+            'fotoSebelum' => 'required|file|mimes:jpg,jpeg,png,webp',
+            'fotoSetelah' => 'required|file|mimes:jpg,jpeg,png,webp',
+        ]);
 
-    // folder upload
-    $path = public_path('uploads/laporan');
-    if (!file_exists($path)) {
-        mkdir($path, 0777, true);
-    }
+        // folder upload
+        $path = public_path('uploads/laporan');
+        if (!file_exists($path)) {
+            mkdir($path, 0777, true);
+        }
 
-    // upload file
-    $surat = time().'_surat.'.$request->file('suratTugas')->getClientOriginalExtension();
-    $sebelum = time().'_sebelum.'.$request->file('fotoSebelum')->getClientOriginalExtension();
-    $setelah = time().'_setelah.'.$request->file('fotoSetelah')->getClientOriginalExtension();
+        // upload file
+        $surat = time().'_surat.'.$request->file('suratTugas')->getClientOriginalExtension();
+        $sebelum = time().'_sebelum.'.$request->file('fotoSebelum')->getClientOriginalExtension();
+        $setelah = time().'_setelah.'.$request->file('fotoSetelah')->getClientOriginalExtension();
 
-    $request->file('suratTugas')->move($path, $surat);
-    $request->file('fotoSebelum')->move($path, $sebelum);
-    $request->file('fotoSetelah')->move($path, $setelah);
+        $request->file('suratTugas')->move($path, $surat);
+        $request->file('fotoSebelum')->move($path, $sebelum);
+        $request->file('fotoSetelah')->move($path, $setelah);
 
-    // simpan ke DB
-    $data = \App\Models\LaporanKonservasi::create([
-        'pengirim' => 1, // sementara fix biar tidak error auth
-        'judulLaporan' => $request->judulLaporan,
-        'jenisKegiatan' => $request->jenisKegiatan,
-        'tanggalMulai' => $request->tanggalMulai,
-        'tanggalSelesai' => $request->tanggalSelesai,
-        'keterangan' => $request->input('keterangan') ?: '-',
-        'daerahLokasi' => $request->daerahLokasi,
-        'kabupaten' => $request->kabupaten,
-        'kecamatan' => $request->kecamatan,
-        'latitude' => $request->latitude,
-        'longitude' => $request->longitude,
-        'luasArea' => $request->luasArea,
-        'suratTugas' => $surat,
-        'fotoSebelum' => $sebelum,
-        'fotoSetelah' => $setelah,
-        'status' => 0,
-    ]);
+        // simpan ke DB
+        $data = \App\Models\LaporanKonservasi::create([
+            'pengirim' => 1, // sementara fix biar tidak error auth
+            'judulLaporan' => $request->judulLaporan,
+            'jenisKegiatan' => $request->jenisKegiatan,
+            'tanggalMulai' => $request->tanggalMulai,
+            'tanggalSelesai' => $request->tanggalSelesai,
+            'keterangan' => $request->input('keterangan') ?: '-',
+            'daerahLokasi' => $request->daerahLokasi,
+            'kabupaten' => $request->kabupaten,
+            'kecamatan' => $request->kecamatan,
+            'latitude' => $request->latitude,
+            'longitude' => $request->longitude,
+            'luasArea' => $request->luasArea,
+            'suratTugas' => $surat,
+            'fotoSebelum' => $sebelum,
+            'fotoSetelah' => $setelah,
+            'status' => 0,
+        ]);
 
-    return response()->json($data, 201);
+        return response()->json($data, 201);
 
-});
+    });
 
 
         Route::put('/admin_pusat/laporan-konservasi/{id}', function (Request $request, $id) {

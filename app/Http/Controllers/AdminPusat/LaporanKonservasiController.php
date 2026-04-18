@@ -50,53 +50,58 @@ class LaporanKonservasiController extends Controller
         //
     }
 
-
+    
     public function store(Request $request)
     {
-        dd($request->input('keterangan'));
+    
+       
         $request->validate([
-            'judulLaporan' => 'required',
-            'jenisKegiatan' => 'required',
-            'tanggalMulai' => 'required|date',
-            'tanggalSelesai' => 'required|date',
-            'daerahLokasi' => 'required',
-            'keterangan' => 'required',
-            'suratTugas' => 'required|file|mimes:jpeg,png,jpg,webp,pdf,doc,docx',
-        ]);
+        'judulLaporan' => 'required',
+        'jenisKegiatan' => 'required',
+        'tanggalMulai' => 'required|date',
+        'tanggalSelesai' => 'required|date',
+        'daerahLokasi' => 'required',
+        'keterangan' => 'required',
+
+        'suratTugas' => 'required|file|mimes:jpeg,png,jpg,webp,pdf,doc,docx',
+        'fotoSebelum' => 'required|image|mimes:jpeg,png,jpg,webp',
+        'fotoSetelah' => 'required|image|mimes:jpeg,png,jpg,webp',
+    ]);
 
         if (!file_exists(public_path('uploads/laporan'))) {
             mkdir(public_path('uploads/laporan'), 0777, true);
         }
         
         $data = [
-            'judulLaporan' => $request->judulLaporan,
-            'jenisKegiatan' => $request->jenisKegiatan,
-            'tanggalMulai' => $request->tanggalMulai,
-            'tanggalSelesai' => $request->tanggalSelesai,
-            'daerahLokasi' => $request->daerahLokasi,
-            'kabupaten' => $request->kabupaten,
-            'kecamatan' => $request->kecamatan,
-            'latitude' => $request->latitude,
-            'longitude' => $request->longitude,
-            'luasArea' => $request->luasArea,
-            'keterangan' => $request->input('keterangan'),
-            'status' => 0,
-            'pengirim' => auth()->id() ?? 1, // 🔥 FIX DI SINI
-        ];
+        'judulLaporan' => $request->judulLaporan,
+        'jenisKegiatan' => $request->jenisKegiatan,
+        'tanggalMulai' => $request->tanggalMulai,
+        'tanggalSelesai' => $request->tanggalSelesai,
+        'daerahLokasi' => $request->daerahLokasi,
+        'kabupaten' => $request->kabupaten,
+        'kecamatan' => $request->kecamatan,
+        'latitude' => $request->latitude,
+        'longitude' => $request->longitude,
+        'luasArea' => $request->luasArea,
+        'keterangan' => $request->keterangan,
+        'lokasiKegiatan' => $request->daerahLokasi, // 🔥 TAMBAH INI
+        'status' => 0,
+        'pengirim' => auth()->id() ?? 1,
+    ];
 
-        if ($request->hasFile('suratTugas')) {
+        if ($request->file('suratTugas')) {
             $file = time().'_'.$request->file('suratTugas')->getClientOriginalName();
             $request->file('suratTugas')->move(public_path('uploads/laporan'), $file);
             $data['suratTugas'] = $file;
         }
 
-        if ($request->hasFile('fotoSebelum')) {
+        if ($request->file('fotoSebelum')) {
             $file = time().'_'.$request->file('fotoSebelum')->getClientOriginalName();
             $request->file('fotoSebelum')->move(public_path('uploads/laporan'), $file);
             $data['fotoSebelum'] = $file;
         }
 
-        if ($request->hasFile('fotoSetelah')) {
+        if ($request->file('fotoSetelah')) {
             $file = time().'_'.$request->file('fotoSetelah')->getClientOriginalName();
             $request->file('fotoSetelah')->move(public_path('uploads/laporan'), $file);
             $data['fotoSetelah'] = $file;

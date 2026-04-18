@@ -1157,9 +1157,9 @@ Route::middleware(['web','auth', 'role:admin_lapangan'])->group(function () {
     Route::get('/admin_pusat/laporan-konservasi', function () {
     return response()->json(\App\Models\LaporanKonservasi::latest()->get());
     });
-    
-    Route::post('/admin_pusat/laporan-konservasi', function (Illuminate\Http\Request $request) {
 
+    Route::post('/admin_pusat/laporan-konservasi', function (Illuminate\Http\Request $request) {
+       
         $request->validate([
             'judulLaporan' => 'required|string|max:255',
             'jenisKegiatan' => 'required|string|max:255',

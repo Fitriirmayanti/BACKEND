@@ -131,9 +131,16 @@ Route::middleware(['api'])->group(function () {
 });
 
 // admin_lapangan APIs (read-only mirrors), protected with same middleware + web session
-Route::middleware(['web','auth', 'role:admin_lapangan'])->group(function () {
+Route::middleware(['auth:sanctum', 'role:admin_lapangan'])->group(function () {
+  
     Route::get('/admin_lapangan/dashboard', function () {
+
         $user = auth()->user();
+                    if (!$user) {
+                return response()->json([
+                    'message' => 'Unauthenticated'
+                ], 401);
+            }
         $laporan = LaporanKonservasi::where('pengirim', $user->id)->get();
         
         $laporanDisetujui = LaporanKonservasi::where('status', 1)
@@ -346,33 +353,28 @@ Route::middleware(['web','auth', 'role:admin_lapangan'])->group(function () {
 
         })->name('admin_lapangan.laporanKonservasi.store');
 
-    Route::put('/admin_lapangan/laporanKonservasi/{id}', function (Request $request, $id) {
-
+    Route::match(['PUT', 'POST'], '/admin_lapangan/laporanKonservasi/{id}', function (Request $request, $id) {
+        
         $user = auth()->user();
         $laporan = LaporanKonservasi::where('pengirim', $user->id)->findOrFail($id);
 
         $request->validate([
-            'judulLaporan'   => 'required|string|max:255',
-            'jenisKegiatan'  => 'required|string|max:255',
-            'tanggalMulai'   => 'required|date',
-            'tanggalSelesai' => 'required|date|after_or_equal:tanggalMulai',
-            'keterangan'     => 'nullable|string',
-            'daerahLokasi'   => 'required|string|max:255',
-            'kabupaten'      => 'required|string|max:255',
-            'kecamatan'      => 'required|string|max:255',
-            'latitude'       => 'required',
-            'longitude'      => 'required',
-            'luasArea'       => 'required|numeric|min:0',
+        'judulLaporan'   => 'required|string|max:255',
+        'jenisKegiatan'  => 'required|string|max:255',
+        'tanggalMulai'   => 'required|date',
+        'tanggalSelesai' => 'required|date|after_or_equal:tanggalMulai',
+        'keterangan'     => 'nullable|string',
+        'daerahLokasi'   => 'required|string|max:255',
+        'kabupaten'      => 'required|string|max:255',
+        'kecamatan'      => 'required|string|max:255',
+        'latitude'       => 'required',
+        'longitude'      => 'required',
+        'luasArea'       => 'required|numeric|min:0',
 
-            'suratTugas'     => 'nullable|array',
-            'suratTugas.*'   => 'file|mimes:jpg,jpeg,png,webp,pdf|max:2048',
-
-            'fotoSebelum'    => 'nullable|array',
-            'fotoSebelum.*'  => 'file|mimes:jpg,jpeg,png,webp,pdf|max:2048',
-
-            'fotoSetelah'    => 'nullable|array',
-            'fotoSetelah.*'  => 'file|mimes:jpg,jpeg,png,webp,pdf|max:2048',
-        ]);
+        'suratTugas'  => 'nullable|file|mimes:jpg,jpeg,png,webp,pdf|max:2048',
+        'fotoSebelum' => 'nullable|file|mimes:jpg,jpeg,png,webp,pdf|max:2048',
+        'fotoSetelah' => 'nullable|file|mimes:jpg,jpeg,png,webp,pdf|max:2048',
+    ]);
 
         // Create upload directory if it doesn't exist
         $uploadPath = public_path('uploads/laporan');
@@ -395,31 +397,36 @@ Route::middleware(['web','auth', 'role:admin_lapangan'])->group(function () {
             'luasArea'       => $request->luasArea,
         ];
 
-        // Handle multiple file uploads if new files are provided
+        // Handle upload file (single file, bukan array lagi)
         foreach (['suratTugas', 'fotoSebelum', 'fotoSetelah'] as $field) {
 
-            if ($request->hasFile($field)) {
+            if ($request->file($field)) {
 
-                // Delete old files if exist
-                $oldFiles = json_decode($laporan->$field, true) ?? [];
+                // 🔥 Ambil file lama (bisa string atau array lama)
+                $oldData = $laporan->$field;
 
-                foreach ($oldFiles as $oldFileName) {
-                    $oldFile = public_path('uploads/laporan/' . $oldFileName);
-                    if (file_exists($oldFile)) {
-                        unlink($oldFile);
+                if ($oldData) {
+                    $oldFiles = is_array(json_decode($oldData, true))
+                        ? json_decode($oldData, true)
+                        : [$oldData];
+
+                    foreach ($oldFiles as $oldFileName) {
+                        $oldFile = public_path('uploads/laporan/' . $oldFileName);
+                        if (file_exists($oldFile)) {
+                            unlink($oldFile);
+                        }
                     }
                 }
 
-                // Upload new files
-                $newFileNames = [];
+                // 🔥 Upload file baru
+                $file = $request->file($field);
 
-                foreach ($request->file($field) as $index => $file) {
-                    $newName = time() . '_' . $field . '_' . $index . '_' . Str::random(5) . '.' . $file->getClientOriginalExtension();
-                    $file->move($uploadPath, $newName);
-                    $newFileNames[] = $newName;
-                }
+                $newName = time() . '_' . $field . '_' . \Str::random(5) . '.' . $file->getClientOriginalExtension();
 
-                $updateData[$field] = json_encode($newFileNames);
+                $file->move($uploadPath, $newName);
+
+                // 🔥 Simpan sebagai string (bukan array lagi)
+                $updateData[$field] = $newName;
             }
         }
 
@@ -458,24 +465,7 @@ Route::middleware(['web','auth', 'role:admin_lapangan'])->group(function () {
         return response()->json($user);
     });
 
-    Route::put('/password', function (Request $request) {
-        $user = auth()->user();
-        
-        $request->validate([
-            'current_password' => 'required|string',
-            'password' => 'required|string|min:8|confirmed',
-        ]);
-
-        if (!Hash::check($request->current_password, $user->password)) {
-            return response()->json(['message' => 'Password lama tidak cocok'], 422);
-        }
-
-        $user->update([
-            'password' => Hash::make($request->password)
-        ]);
-
-        return response()->json(['message' => 'Password berhasil diperbarui']);
-    });
+    
 
     Route::put('/profile', function (Request $request) {
         $user = auth()->user();
@@ -492,6 +482,7 @@ Route::middleware(['web','auth', 'role:admin_lapangan'])->group(function () {
 
     Route::put('/password', function (Request $request) {
         $user = auth()->user();
+
         $request->validate([
             'current_password' => 'required|current_password',
             'password' => 'required|string|min:8|confirmed',
@@ -501,9 +492,11 @@ Route::middleware(['web','auth', 'role:admin_lapangan'])->group(function () {
             'password' => Hash::make($request->password)
         ]);
 
-        return response()->json(['message' => 'Password berhasil diperbarui']);
+        return response()->json([
+            'message' => 'Password berhasil diperbarui'
+        ]);
     });
-});
+ });
 
 // admin_pusat APIs (read-only mirrors), protected with same middleware + web session
     Route::get('/test-galeri', function (Request $request) {

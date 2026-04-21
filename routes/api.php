@@ -450,20 +450,7 @@ Route::middleware(['auth:sanctum', 'role:admin_lapangan'])->group(function () {
         return response()->json(auth()->user());
     });
 
-    Route::put('/profile', function (Request $request) {
-        $user = auth()->user();
-        
-        $request->validate([
-            'name' => 'required|string|max:255',
-            'username' => 'required|string|max:255|unique:users,username,' . $user->id,
-            'email' => 'required|string|email|max:255|unique:users,email,' . $user->id,
-            'nohp' => 'nullable|string|max:20',
-        ]);
-
-        $user->update($request->only(['name', 'username', 'email', 'nohp']));
-
-        return response()->json($user);
-    });
+    
 
     
 
@@ -499,6 +486,7 @@ Route::middleware(['auth:sanctum', 'role:admin_lapangan'])->group(function () {
  });
 
 // admin_pusat APIs (read-only mirrors), protected with same middleware + web session
+Route::middleware(['auth:sanctum', 'role:admin_pusat'])->group(function () {
     Route::get('/test-galeri', function (Request $request) {
         return response()->json([
             'data' => Galeri::all()
@@ -1310,4 +1298,4 @@ Route::middleware(['auth:sanctum', 'role:admin_lapangan'])->group(function () {
             return response()->json(['message' => 'Laporan berhasil dihapus']);
     
             })->name('admin_pusat.laporan-konservasi.destroy');
-    
+    });

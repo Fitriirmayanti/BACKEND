@@ -18,6 +18,7 @@ return [
     // Ganti origin sesuai URL dev FE
     'allowed_origins' => [
         'http://localhost:5173',
+        'https://sikoma-frontend.vercel.app'
     ],
 
     'allowed_origins_patterns' => [],

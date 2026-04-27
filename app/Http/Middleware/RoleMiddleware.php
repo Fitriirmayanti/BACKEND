@@ -10,7 +10,10 @@ class RoleMiddleware
     public function handle(Request $request, Closure $next, ...$roles)
     {
         if (! $request->user() || ! in_array($request->user()->role, $roles)) {
-            abort(403, 'Unauthorized');
+            return response()->json([
+                'success' => false,
+                'message' => 'Akses ditolak'
+            ], 403);
         }
 
         return $next($request);

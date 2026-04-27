@@ -62,9 +62,9 @@ class LaporanKonservasiController extends Controller
             'daerahLokasi' => 'required',
             'keterangan' => 'required',
 
-            'suratTugas' => 'required|file',
-            'fotoSebelum' => 'required|image',
-            'fotoSetelah' => 'required|image',
+            'suratTugas' => 'nullable|file|mimes:jpeg,png,jpg,webp,pdf,doc,docx',
+            'fotoSebelum' => 'required|image|mimes:jpeg,png,jpg,webp',
+            'fotoSetelah' => 'required|image|mimes:jpeg,png,jpg,webp',
         ]);
 
         // 🔥 folder upload (sama kayak controller lama)
@@ -212,9 +212,9 @@ class LaporanKonservasiController extends Controller
             'daerahLokasi' => 'required',
             'keterangan' => 'required',
 
-            'suratTugas' => 'nullable|file',
-            'fotoSebelum' => 'nullable|image',
-            'fotoSetelah' => 'nullable|image',
+            'suratTugas' => 'nullable|file|mimes:jpeg,png,jpg,webp,pdf,doc,docx',
+            'fotoSebelum' => 'required|image|mimes:jpeg,png,jpg,webp',
+            'fotoSetelah' => 'required|image|mimes:jpeg,png,jpg,webp',
         ]);
 
         // 🔥 update data utama

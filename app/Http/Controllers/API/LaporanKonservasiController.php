@@ -337,7 +337,8 @@ class LaporanKonservasiController extends Controller
         return response()->json([
             'success' => true,
             'message' => 'Laporan berhasil dihapus'
-        ]);
+      
+            ]);
     }
 
 

@@ -292,7 +292,7 @@ class LaporanKonservasiController extends Controller
 
 
 
-    // ✅ DELETE (HAPUS FILE JUGA)
+    // ✅ DELETE (FINAL + VALIDASI STATUS)
     public function destroy(Request $request, $id)
     {
         $user = $request->user();
@@ -300,17 +300,32 @@ class LaporanKonservasiController extends Controller
         $data = LaporanKonservasi::find($id);
 
         if (!$data) {
-            return response()->json(['message' => 'Tidak ditemukan'], 404);
+            return response()->json([
+                'success' => false,
+                'message' => 'Tidak ditemukan'
+            ], 404);
         }
 
+        // 🔐 hanya pemilik (admin lapangan)
         if ($user->role === 'admin_lapangan' && $data->pengirim != $user->id) {
-            return response()->json(['message' => 'Tidak punya akses'], 403);
+            return response()->json([
+                'success' => false,
+                'message' => 'Tidak punya akses'
+            ], 403);
+        }
+
+        // ❌ tidak boleh hapus jika sudah disetujui
+        if ($data->status == 1) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Laporan sudah disetujui dan tidak bisa dihapus'
+            ], 400);
         }
 
         // 🔥 hapus file
         foreach (['suratTugas', 'fotoSebelum', 'fotoSetelah'] as $field) {
             if ($data->$field) {
-                $path = public_path('uploads/laporan/'.$data->$field);
+                $path = public_path('uploads/laporan/' . $data->$field);
                 if (file_exists($path)) {
                     unlink($path);
                 }
@@ -320,6 +335,7 @@ class LaporanKonservasiController extends Controller
         $data->delete();
 
         return response()->json([
+            'success' => true,
             'message' => 'Laporan berhasil dihapus'
         ]);
     }

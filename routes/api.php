@@ -147,6 +147,7 @@ Route::prefix('laporan-konservasi')->middleware('auth:sanctum')->group(function 
     // 🧑‍💼 ADMIN PUSAT
     Route::middleware('role:admin_pusat')->group(function () {
         Route::put('/{id}/status', [LaporanKonservasiController::class, 'updateStatus']);
+        
     });
 
 });

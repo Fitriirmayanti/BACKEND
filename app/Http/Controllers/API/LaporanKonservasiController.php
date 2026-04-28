@@ -55,12 +55,17 @@ class LaporanKonservasiController extends Controller
         }
 
         $request->validate([
-            'judulLaporan' => 'required',
-            'jenisKegiatan' => 'required',
-            'tanggalMulai' => 'required|date',
-            'tanggalSelesai' => 'required|date',
-            'daerahLokasi' => 'required',
-            'keterangan' => 'required',
+            'judulLaporan'   => 'required|string|max:255',
+            'jenisKegiatan'  => 'required|string|max:255',
+            'tanggalMulai'   => 'required|date',
+            'tanggalSelesai' => 'required|date|after_or_equal:tanggalMulai',
+            'keterangan'     => 'nullable|string',
+            'daerahLokasi'   => 'required|string|max:255',
+            'kabupaten'      => 'required|string|max:255',
+            'kecamatan'      => 'required|string|max:255',
+            'latitude'       => 'required',
+            'longitude'      => 'required',
+            'luasArea'       => 'required|numeric|min:0',
 
             'suratTugas' => 'nullable|file|mimes:jpeg,png,jpg,webp,pdf,doc,docx',
             'fotoSebelum' => 'required|image|mimes:jpeg,png,jpg,webp',
@@ -205,13 +210,19 @@ class LaporanKonservasiController extends Controller
 
         // ✅ VALIDASI
         $validated = $request->validate([
-            'judulLaporan' => 'required',
-            'jenisKegiatan' => 'required',
-            'tanggalMulai' => 'required|date',
-            'tanggalSelesai' => 'required|date',
-            'daerahLokasi' => 'required',
-            'keterangan' => 'required',
+            'judulLaporan'   => 'required|string|max:255',
+            'jenisKegiatan'  => 'required|string|max:255',
+            'tanggalMulai'   => 'required|date',
+            'tanggalSelesai' => 'required|date|after_or_equal:tanggalMulai',
+            'keterangan'     => 'nullable|string',
 
+            'daerahLokasi'   => 'required|string|max:255',
+            'kabupaten'      => 'required|string|max:255',
+            'kecamatan'      => 'required|string|max:255',
+            'latitude'       => 'required',
+            'longitude'      => 'required',
+
+            'luasArea'       => 'required|numeric|min:0',
             'suratTugas' => 'nullable|file|mimes:jpeg,png,jpg,webp,pdf,doc,docx',
             'fotoSebelum' => 'required|image|mimes:jpeg,png,jpg,webp',
             'fotoSetelah' => 'required|image|mimes:jpeg,png,jpg,webp',

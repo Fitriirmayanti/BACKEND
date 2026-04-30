@@ -68,8 +68,8 @@ class LaporanKonservasiController extends Controller
             'luasArea'       => 'required|numeric|min:0',
 
             'suratTugas' => 'nullable|file|mimes:jpeg,png,jpg,webp,pdf,doc,docx',
-            'fotoSebelum' => 'required|image|mimes:jpeg,png,jpg,webp',
-            'fotoSetelah' => 'required|image|mimes:jpeg,png,jpg,webp',
+            'fotoSebelum' => 'nullable|image|mimes:jpeg,png,jpg,webp',
+            'fotoSetelah' => 'nullable|image|mimes:jpeg,png,jpg,webp',
         ]);
 
         // 🔥 folder upload (sama kayak controller lama)
@@ -224,8 +224,8 @@ class LaporanKonservasiController extends Controller
 
             'luasArea'       => 'required|numeric|min:0',
             'suratTugas' => 'nullable|file|mimes:jpeg,png,jpg,webp,pdf,doc,docx',
-            'fotoSebelum' => 'required|image|mimes:jpeg,png,jpg,webp',
-            'fotoSetelah' => 'required|image|mimes:jpeg,png,jpg,webp',
+            'fotoSebelum' => 'nullable|image|mimes:jpeg,png,jpg,webp',
+            'fotoSetelah' => 'nullable|image|mimes:jpeg,png,jpg,webp',
         ]);
 
         // 🔥 update data utama
@@ -353,7 +353,7 @@ class LaporanKonservasiController extends Controller
     }
 
 
-    public function updateStatus(Request $request, $id)
+    public function updateStatus(Request $request, $id) 
     {
         $user = $request->user();
 
@@ -377,11 +377,20 @@ class LaporanKonservasiController extends Controller
 
         // ✅ VALIDASI
         $validated = $request->validate([
-            'status' => 'required|in:0,1,2'
+            'status' => 'required|in:0,1,2',
+            'alasan' => 'required_if:status,2|string'
         ]);
 
         // 🔥 update status
         $data->status = $validated['status'];
+
+        // 🔥 SIMPAN ALASAN
+        if ($validated['status'] == 2) {
+            $data->alasan = $validated['alasan'];
+        } else {
+            $data->alasan = null;
+        }
+
         $data->save();
 
         // 🔥 TAMBAHAN: status_text

@@ -1,5 +1,5 @@
 ---
 deployment:
   tasks:
-    - export DEPLOYPATH=/home/codg6743/public_html/sikoma
-    - /bin/cp -r * $DEPLOYPATH
+    - export DEPLOYPATH=/home/codg6743/public_html/git
+    - /bin/cp -r public/* $DEPLOYPATH

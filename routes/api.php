@@ -23,6 +23,7 @@ use Illuminate\Support\Facades\Hash;
 //use App\Http\Controllers\AdminPusat\LaporanKonservasiController;
 use App\Http\Controllers\API\LaporanKonservasiController;
 use App\Http\Controllers\API\PenggunaController;
+use App\Http\Controllers\API\ProgramController;
 
 Route::middleware('api')->group(function () {
     Route::get('/health', function () {
@@ -154,18 +155,57 @@ Route::prefix('laporan-konservasi')->middleware('auth:sanctum')->group(function 
 });
 
 // ===============================
-// CRUD PENGGUNA
+// ADMIN PUSAT
 // ===============================
 
-Route::get('/pengguna', [PenggunaController::class, 'index']);
-Route::get('/pengguna/{id}', [PenggunaController::class, 'show']);
-Route::post('/pengguna', [PenggunaController::class, 'store']);
-Route::put('/pengguna/{id}', [PenggunaController::class, 'update']);
-Route::delete('/pengguna/{id}', [PenggunaController::class, 'destroy']);
+Route::prefix('admin_pusat')->group(function () {
+
+    // ===============================
+    // CRUD PENGGUNA
+    // ===============================
+
+    Route::get('/pengguna', [PenggunaController::class, 'index'])
+        ->name('admin_pusat.pengguna.index');
+
+    Route::get('/pengguna/{id}', [PenggunaController::class, 'show'])
+        ->name('admin_pusat.pengguna.show');
+
+    Route::post('/pengguna', [PenggunaController::class, 'store'])
+        ->name('admin_pusat.pengguna.store');
+
+    Route::put('/pengguna/{id}', [PenggunaController::class, 'update'])
+        ->name('admin_pusat.pengguna.update');
+
+    Route::delete('/pengguna/{id}', [PenggunaController::class, 'destroy'])
+        ->name('admin_pusat.pengguna.destroy');
 
 
+    // =========================
+    // CRUD PROGRAM
+    // =========================
 
+    Route::get('/program', [ProgramController::class, 'index'])
+        ->name('admin_pusat.program.index');
 
+    Route::post('/program', [ProgramController::class, 'store'])
+        ->name('admin_pusat.program.store');
+
+    Route::get('/program/{id}', [ProgramController::class, 'show'])
+        ->name('admin_pusat.program.show');
+
+    Route::put('/program/{id}', [ProgramController::class, 'update'])
+        ->name('admin_pusat.program.update');
+
+    Route::delete('/program/{id}', [ProgramController::class, 'destroy'])
+        ->name('admin_pusat.program.destroy');
+
+});
+// =========================
+// PROGRAM PUBLIK
+// =========================
+
+Route::get('/program', [ProgramController::class, 'index']);
+Route::get('/program/{id}', [ProgramController::class, 'show']);
 
 
 
@@ -764,81 +804,7 @@ Route::delete('/pengguna/{id}', [PenggunaController::class, 'destroy']);
         return response()->json($website);
     })->name('admin_pusat.website.update');
 
-    Route::get('/admin_pusat/program', function () {
-        return response()->json(Edukasi::where('kategori', 'Program')->orderBy('id', 'desc')->get());
-    })->name('admin_pusat.program.index');
-
-    Route::post('/admin_pusat/program', function (Request $request) {
-        $request->validate([
-            'judul' => 'required|string|max:255',
-            'deskripsi' => 'nullable|string',
-            'foto' => 'nullable|image|mimes:jpeg,png,jpg,webp|max:2048',
-            'kategori' => 'nullable|string|max:255',
-        ]);
-
-        $fotoName = null;
-        if ($request->hasFile('foto')) {
-            $fotoName = time() . '_' . $request->foto->getClientOriginalName();
-            $request->foto->move(public_path('uploads/edukasi'), $fotoName);
-        }
-
-        // Generate keygaleri for the program
-        $keygaleri = Str::random(8);
-
-        $edukasi = Edukasi::create([
-            'judul' => $request->judul,
-            'slug' => Str::slug($request->judul),
-            'deskripsi' => $request->deskripsi,
-            'foto' => $fotoName,
-            'kategori' => $request->kategori ?: 'Program',
-            'keygaleri' => $keygaleri,
-        ]);
-
-        return response()->json($edukasi, 201);
-    })->name('admin_pusat.program.store');
-
-    Route::match(['put', 'post'], '/admin_pusat/program/{id}', function (Request $request, $id) {
-        $edukasi = Edukasi::findOrFail($id);
-
-        $request->validate([
-            'judul' => 'required|string|max:255',
-            'deskripsi' => 'nullable|string',
-            'foto' => 'nullable|image|mimes:jpeg,png,jpg,webp|max:2048',
-            'kategori' => 'nullable|string|max:255',
-        ]);
-
-        $data = $request->only(['judul', 'deskripsi', 'kategori']);
-        $data['slug'] = Str::slug($request->judul);
-
-        if ($request->hasFile('foto')) {
-            // Delete old image
-            if ($edukasi->foto && file_exists(public_path('uploads/edukasi/' . $edukasi->foto))) {
-                unlink(public_path('uploads/edukasi/' . $edukasi->foto));
-            }
-
-            $fotoName = time() . '_' . $request->foto->getClientOriginalName();
-            $request->foto->move(public_path('uploads/edukasi'), $fotoName);
-            $data['foto'] = $fotoName;
-        }
-
-        $edukasi->update($data);
-
-        return response()->json($edukasi);
-    })->name('admin_pusat.program.update');
-
-    Route::delete('/admin_pusat/program/{id}', function ($id) {
-        $edukasi = Edukasi::findOrFail($id);
-
-        // Delete image file
-        if ($edukasi->foto && file_exists(public_path('uploads/edukasi/' . $edukasi->foto))) {
-            unlink(public_path('uploads/edukasi/' . $edukasi->foto));
-        }
-
-        $edukasi->delete();
-
-        return response()->json(['message' => 'Program berhasil dihapus']);
-    })->name('admin_pusat.program.destroy');
-
+    
     Route::get('/admin_pusat/edukasi', function () {
         return response()->json(Edukasi::where('kategori', '!=', 'Program')->orderBy('id', 'desc')->get());
     })->name('admin_pusat.edukasi.index');

@@ -24,6 +24,7 @@ use Illuminate\Support\Facades\Hash;
 use App\Http\Controllers\API\LaporanKonservasiController;
 use App\Http\Controllers\API\PenggunaController;
 use App\Http\Controllers\API\ProgramController;
+use App\Http\Controllers\API\EdukasiController;
 
 Route::middleware('api')->group(function () {
     Route::get('/health', function () {
@@ -55,14 +56,7 @@ Route::middleware('api')->group(function () {
     ]);
     });
 
-    Route::get('/edukasi/{slug}', function (string $slug) {
-        $edukasi = Edukasi::where('slug', $slug)->first();
-        if (!$edukasi) {
-            return response()->json(['message' => 'Not found'], 404);
-        }
-        $galeri = Galeri::where('keygaleri', $edukasi->keygaleri)->get();
-        return response()->json(compact('edukasi', 'galeri'));
-    });
+    
 
     Route::get('/informasi', function () {
         $satwa = Edukasi::where('kategori', 'Satwa')->orderBy('id', 'desc')->get();
@@ -199,6 +193,25 @@ Route::prefix('admin_pusat')->group(function () {
     Route::delete('/program/{id}', [ProgramController::class, 'destroy'])
         ->name('admin_pusat.program.destroy');
 
+    // =========================
+    // CRUD EDUKASI
+    // =========================
+
+    Route::get('/edukasi', [EdukasiController::class, 'index'])
+        ->name('admin_pusat.edukasi.index');
+
+    Route::post('/edukasi', [EdukasiController::class, 'store'])
+        ->name('admin_pusat.edukasi.store');
+
+    Route::get('/edukasi/{id}', [EdukasiController::class, 'show'])
+        ->name('admin_pusat.edukasi.show');
+
+    Route::put('/edukasi/{id}', [EdukasiController::class, 'update'])
+        ->name('admin_pusat.edukasi.update');
+
+    Route::delete('/edukasi/{id}', [EdukasiController::class, 'destroy'])
+        ->name('admin_pusat.edukasi.destroy');
+
 });
 // =========================
 // PROGRAM PUBLIK
@@ -207,7 +220,12 @@ Route::prefix('admin_pusat')->group(function () {
 Route::get('/program', [ProgramController::class, 'index']);
 Route::get('/program/{id}', [ProgramController::class, 'show']);
 
+// =========================
+// EDUKASI PUBLIK
+// =========================
 
+Route::get('/edukasi', [EdukasiController::class, 'index']);
+Route::get('/edukasi/{id}', [EdukasiController::class, 'show']);
 
 
 
@@ -805,99 +823,7 @@ Route::get('/program/{id}', [ProgramController::class, 'show']);
     })->name('admin_pusat.website.update');
 
     
-    Route::get('/admin_pusat/edukasi', function () {
-        return response()->json(Edukasi::where('kategori', '!=', 'Program')->orderBy('id', 'desc')->get());
-    })->name('admin_pusat.edukasi.index');
-
-    Route::post('/admin_pusat/edukasi', function (Request $request) {
-        $request->validate([
-            'judul' => 'required|string|max:255',
-            'deskripsi' => 'nullable|string',
-            'foto' => 'nullable|image|mimes:jpeg,png,jpg,webp|max:2048',
-            'kategori' => 'nullable|string|in:Edukasi,Informasi,Berita',
-        ]);
-
-        $fotoName = null;
-        if ($request->hasFile('foto')) {
-            $fotoName = time() . '_' . $request->foto->getClientOriginalName();
-            $request->foto->move(public_path('uploads/edukasi'), $fotoName);
-        }
-
-        // Generate keygaleri for the edukasi
-        $keygaleri = Str::random(8);
-
-        // Map frontend kategori to database enum values
-        $kategoriMapping = [
-            'Edukasi' => 'Satwa',
-            'Informasi' => 'Executive', 
-            'Berita' => 'Program'
-        ];
-        
-        $kategoriValue = $kategoriMapping[$request->kategori] ?? 'Satwa';
-
-        $edukasi = Edukasi::create([
-            'judul' => $request->judul,
-            'slug' => Str::slug($request->judul),
-            'deskripsi' => $request->deskripsi,
-            'foto' => $fotoName,
-            'kategori' => $kategoriValue,
-            'keygaleri' => $keygaleri,
-        ]);
-
-        return response()->json($edukasi, 201);
-    })->name('admin_pusat.edukasi.store');
-
-    Route::match(['put', 'post'], '/admin_pusat/edukasi/{id}', function (Request $request, $id) {
-        $edukasi = Edukasi::findOrFail($id);
-
-        $request->validate([
-            'judul' => 'required|string|max:255',
-            'deskripsi' => 'nullable|string',
-            'foto' => 'nullable|image|mimes:jpeg,png,jpg,webp|max:2048',
-            'kategori' => 'nullable|string|in:Edukasi,Informasi,Berita',
-        ]);
-
-        $data = $request->only(['judul', 'deskripsi']);
-        $data['slug'] = Str::slug($request->judul);
-
-        // Map frontend kategori to database enum values
-        if ($request->kategori) {
-            $kategoriMapping = [
-                'Edukasi' => 'Satwa',
-                'Informasi' => 'Executive', 
-                'Berita' => 'Program'
-            ];
-            $data['kategori'] = $kategoriMapping[$request->kategori] ?? 'Satwa';
-        }
-
-        if ($request->hasFile('foto')) {
-            // Delete old image
-            if ($edukasi->foto && file_exists(public_path('uploads/edukasi/' . $edukasi->foto))) {
-                unlink(public_path('uploads/edukasi/' . $edukasi->foto));
-            }
-
-            $fotoName = time() . '_' . $request->foto->getClientOriginalName();
-            $request->foto->move(public_path('uploads/edukasi'), $fotoName);
-            $data['foto'] = $fotoName;
-        }
-
-        $edukasi->update($data);
-
-        return response()->json($edukasi);
-    })->name('admin_pusat.edukasi.update');
-
-    Route::delete('/admin_pusat/edukasi/{id}', function ($id) {
-        $edukasi = Edukasi::findOrFail($id);
-
-        // Delete image file
-        if ($edukasi->foto && file_exists(public_path('uploads/edukasi/' . $edukasi->foto))) {
-            unlink(public_path('uploads/edukasi/' . $edukasi->foto));
-        }
-
-        $edukasi->delete();
-
-        return response()->json(['message' => 'Konten berhasil dihapus']);
-    })->name('admin_pusat.edukasi.destroy');
+    
 
     Route::get('/admin_pusat/kawasan', function () {
         return response()->json(KawasanKonservasi::orderBy('id', 'desc')->get());

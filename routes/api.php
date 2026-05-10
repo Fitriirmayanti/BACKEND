@@ -39,24 +39,6 @@ Route::middleware('api')->group(function () {
         return response()->json(compact('banner', 'program', 'website'));
     });
 
-    Route::get('/edukasi', function (Request $request) {
-    $kategori = $request->query('kategori') ?: 'Program';
-
-    $items = Edukasi::where('kategori', $kategori)
-        ->orderBy('id', 'desc')
-        ->get()
-        ->map(function ($item) {
-            $item->foto = url('uploads/edukasi/' . $item->foto);
-            return $item;
-        });
-
-    return response()->json([
-        'kategori' => $kategori,
-        'items' => $items
-    ]);
-    });
-
-    
 
     Route::get('/informasi', function () {
         $satwa = Edukasi::where('kategori', 'Satwa')->orderBy('id', 'desc')->get();

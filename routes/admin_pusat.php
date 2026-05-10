@@ -41,16 +41,16 @@ Route::middleware(['auth', 'role:admin_pusat'])->group(function () {
     //Route::resource('/admin_pusat/laporanKonservasi', LaporanKonservasiController::class)
        // ->names('admin_pusat.laporanKonservasi');
 
-    Route::get('/admin_pusat/laporanKonservasi/setujui/{id}', 
-        [LaporanKonservasiController::class, 'setujui'])
-        ->name('admin_pusat.laporanKonservasi.setujui');
+    //Route::get('/admin_pusat/laporanKonservasi/setujui/{id}', 
+      //  [LaporanKonservasiController::class, 'setujui'])
+      //  ->name('admin_pusat.laporanKonservasi.setujui');
 
-    Route::get('/admin_pusat/laporanKonservasi/tolak/{id}', 
-        [LaporanKonservasiController::class, 'tolak'])
-        ->name('admin_pusat.laporanKonservasi.tolak');
+    //Route::get('/admin_pusat/laporanKonservasi/tolak/{id}', 
+       // [LaporanKonservasiController::class, 'tolak'])
+       // ->name('admin_pusat.laporanKonservasi.tolak');
 
-    Route::get('/admin_pusat/website', [WebsiteController::class, 'index'])
-        ->name('admin_pusat.website');
+    //Route::get('/admin_pusat/website', [WebsiteController::class, 'index'])
+      //  ->name('admin_pusat.website');
 
     //Route::put('/admin_pusat/website/update', [WebsiteController::class, 'update'])
         //->name('admin_pusat.website.update');

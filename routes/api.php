@@ -22,6 +22,7 @@ use Illuminate\Support\Facades\Cookie;
 use Illuminate\Support\Facades\Hash;
 //use App\Http\Controllers\AdminPusat\LaporanKonservasiController;
 use App\Http\Controllers\API\LaporanKonservasiController;
+use App\Http\Controllers\API\PenggunaController;
 
 Route::middleware('api')->group(function () {
     Route::get('/health', function () {
@@ -151,6 +152,16 @@ Route::prefix('laporan-konservasi')->middleware('auth:sanctum')->group(function 
     });
 
 });
+
+// ===============================
+// CRUD PENGGUNA
+// ===============================
+
+Route::get('/pengguna', [PenggunaController::class, 'index']);
+Route::get('/pengguna/{id}', [PenggunaController::class, 'show']);
+Route::post('/pengguna', [PenggunaController::class, 'store']);
+Route::put('/pengguna/{id}', [PenggunaController::class, 'update']);
+Route::delete('/pengguna/{id}', [PenggunaController::class, 'destroy']);
 
 
 
@@ -616,58 +627,7 @@ Route::prefix('laporan-konservasi')->middleware('auth:sanctum')->group(function 
         return response()->json(['message' => 'Customer berhasil dihapus']);
     })->name('admin_pusat.customer.destroy');
 
-    Route::get('/admin_pusat/pengguna', function () {
-        return response()->json(User::whereIn('role', ['admin_lapangan', 'admin_pusat'])->orderBy('id', 'desc')->get());
-    })->name('admin_pusat.pengguna.index');
-
-    Route::post('/admin_pusat/pengguna', function (Request $request) {
-        $request->validate([
-            'name' => 'required|string|max:255',
-            'username' => 'required|string|max:255|unique:users,username',
-            'email' => 'required|string|email|max:255|unique:users,email',
-            'password' => 'required|string|min:8',
-            'role' => 'required|string|in:admin_lapangan,admin_pusat',
-        ]);
-
-        $user = User::create([
-            'name' => $request->name,
-            'username' => $request->username,
-            'email' => $request->email,
-            'password' => Hash::make($request->password),
-            'role' => $request->role,
-        ]);
-
-        return response()->json($user, 201);
-    })->name('admin_pusat.pengguna.store');
-
-    Route::put('/admin_pusat/pengguna/{id}', function (Request $request, $id) {
-        $user = User::findOrFail($id);
-
-        $request->validate([
-            'name' => 'required|string|max:255',
-            'username' => 'required|string|max:255|unique:users,username,' . $id,
-            'email' => 'required|string|email|max:255|unique:users,email,' . $id,
-            'password' => 'nullable|string|min:8',
-            'role' => 'required|string|in:admin_lapangan,admin_pusat',
-        ]);
-
-        $data = $request->only(['name', 'username', 'email', 'nohp', 'role']);
-
-        if ($request->filled('password')) {
-            $data['password'] = Hash::make($request->password);
-        }
-
-        $user->update($data);
-
-        return response()->json($user);
-    })->name('admin_pusat.pengguna.update');
-
-    Route::delete('/admin_pusat/pengguna/{id}', function ($id) {
-        $user = User::findOrFail($id);
-        $user->delete();
-
-        return response()->json(['message' => 'Pengguna berhasil dihapus']);
-    })->name('admin_pusat.pengguna.destroy');
+    
 
     Route::get('/admin_pusat/website', function () {
         $website = Website::first();

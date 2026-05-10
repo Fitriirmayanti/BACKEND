@@ -6,7 +6,7 @@ use App\Http\Controllers\AdminPusat\EdukasiController;
 use App\Http\Controllers\AdminPusat\GaleriController;
 use App\Http\Controllers\AdminPusat\KawasanController;
 use App\Http\Controllers\AdminPusat\LaporanKonservasiController;
-use App\Http\Controllers\AdminPusat\PenggunaController;
+//use App\Http\Controllers\AdminPusat\PenggunaController;
 use App\Http\Controllers\AdminPusat\PeraturanController;
 use App\Http\Controllers\AdminPusat\ProgramController;
 use App\Http\Controllers\AdminPusat\WebsiteController;

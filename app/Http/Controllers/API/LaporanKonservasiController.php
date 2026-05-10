@@ -68,8 +68,8 @@ class LaporanKonservasiController extends Controller
             'luasArea'       => 'required|numeric|min:0',
 
             'suratTugas' => 'nullable|file|mimes:jpeg,png,jpg,webp,pdf,doc,docx',
-            'fotoSebelum' => 'nullable|image|mimes:jpeg,png,jpg,webp',
-            'fotoSetelah' => 'nullable|image|mimes:jpeg,png,jpg,webp',
+            'fotoSebelum' => 'required|image|mimes:jpeg,png,jpg,webp',
+            'fotoSetelah' => 'required|image|mimes:jpeg,png,jpg,webp',
         ]);
 
         // 🔥 folder upload (sama kayak controller lama)
@@ -94,26 +94,101 @@ class LaporanKonservasiController extends Controller
             'pengirim' => $user->id,
         ];
 
-        // 🔥 upload surat
-        if ($request->file('suratTugas')) {
-            $file = time().'_'.$request->file('suratTugas')->getClientOriginalName();
-            $request->file('suratTugas')->move(public_path('uploads/laporan'), $file);
-            $data['suratTugas'] = $file;
+        
+        // 🔥 upload surat tugas
+        if ($request->hasFile('suratTugas')) {
+        
+            $file = $request->file('suratTugas');
+        
+            $filename = time() . '_surat_' . uniqid() . '.' . $file->getClientOriginalExtension();
+        
+            // 🔥 path ke public_html
+            $destination = '/home/codg6743/public_html/uploads/laporan';
+        
+            // 🔥 pastikan folder ada
+            if (!file_exists($destination)) {
+                mkdir($destination, 0777, true);
+            }
+        
+            // 🔥 upload file
+            $uploaded = $file->move($destination, $filename);
+        
+            // 🔥 simpan ke database jika berhasil
+            if ($uploaded) {
+                $data['suratTugas'] = $filename;
+            } else {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Upload surat tugas gagal'
+                ], 500);
+            }
         }
 
-        // 🔥 foto sebelum
-        if ($request->file('fotoSebelum')) {
-            $file = time().'_'.$request->file('fotoSebelum')->getClientOriginalName();
-            $request->file('fotoSebelum')->move(public_path('uploads/laporan'), $file);
-            $data['fotoSebelum'] = $file;
-        }
 
-        // 🔥 foto setelah
-        if ($request->file('fotoSetelah')) {
-            $file =  time().'_'.$request->file('fotoSetelah')->getClientOriginalName();
-            $request->file('fotoSetelah')->move(public_path('uploads/laporan'), $file);
-            $data['fotoSetelah'] = $file;
+        
+     
+        // 🔥 upload foto sebelum
+        if ($request->hasFile('fotoSebelum')) {
+        
+            $file = $request->file('fotoSebelum');
+        
+            $filename = time() . '_fotoSebelum_' . uniqid() . '.' . $file->getClientOriginalExtension();
+        
+            // 🔥 path ke public_html
+            $destination = '/home/codg6743/public_html/uploads/laporan';
+        
+            // 🔥 pastikan folder ada
+            if (!file_exists($destination)) {
+                mkdir($destination, 0777, true);
+            }
+        
+            // 🔥 upload file
+            $uploaded = $file->move($destination, $filename);
+        
+            // 🔥 simpan ke database jika berhasil
+            if ($uploaded) {
+                $data['fotoSebelum'] = $filename;
+            } else {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Upload foto sebelum gagal'
+                ], 500);
+            }
         }
+       
+
+        
+   
+        // 🔥 upload foto setelah
+        if ($request->hasFile('fotoSetelah')) {
+        
+            $file = $request->file('fotoSetelah');
+        
+            $filename = time() . '_fotoSetelah_' . uniqid() . '.' . $file->getClientOriginalExtension();
+        
+            // 🔥 path ke public_html
+            $destination = '/home/codg6743/public_html/uploads/laporan';
+        
+            // 🔥 pastikan folder ada
+            if (!file_exists($destination)) {
+                mkdir($destination, 0777, true);
+            }
+        
+            // 🔥 upload file
+            $uploaded = $file->move($destination, $filename);
+        
+            // 🔥 simpan ke database jika berhasil
+            if ($uploaded) {
+                $data['fotoSetelah'] = $filename;
+            } else {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Upload foto setelah gagal'
+                ], 500);
+            }
+        }
+       
+
 
        $laporan = LaporanKonservasi::create($data);
 
@@ -163,6 +238,17 @@ class LaporanKonservasiController extends Controller
             2 => 'ditolak',
             default => 'unknown'
         };
+        $data->suratTugas_url = $data->suratTugas
+            ? asset('uploads/laporan/' . $data->suratTugas)
+            : null;
+        
+        $data->fotoSebelum_url = $data->fotoSebelum
+            ? asset('uploads/laporan/' . $data->fotoSebelum)
+            : null;
+        
+        $data->fotoSetelah_url = $data->fotoSetelah
+            ? asset('uploads/laporan/' . $data->fotoSetelah)
+            : null;
 
         return response()->json([
             'success' => true,
@@ -224,8 +310,8 @@ class LaporanKonservasiController extends Controller
 
             'luasArea'       => 'required|numeric|min:0',
             'suratTugas' => 'nullable|file|mimes:jpeg,png,jpg,webp,pdf,doc,docx',
-            'fotoSebelum' => 'nullable|image|mimes:jpeg,png,jpg,webp',
-            'fotoSetelah' => 'nullable|image|mimes:jpeg,png,jpg,webp',
+            'fotoSebelum' => 'required|image|mimes:jpeg,png,jpg,webp',
+            'fotoSetelah' => 'required|image|mimes:jpeg,png,jpg,webp',
         ]);
 
         // 🔥 update data utama

@@ -26,6 +26,7 @@ use App\Http\Controllers\API\PenggunaController;
 use App\Http\Controllers\API\ProgramController;
 use App\Http\Controllers\API\EdukasiController;
 use App\Http\Controllers\API\PeraturanController;
+use App\Http\Controllers\API\KawasanController;
 
 Route::middleware('api')->group(function () {
     Route::get('/health', function () {
@@ -156,7 +157,6 @@ Route::prefix('admin_pusat')->group(function () {
     Route::delete('/pengguna/{id}', [PenggunaController::class, 'destroy'])
         ->name('admin_pusat.pengguna.destroy');
 
-
     // =========================
     // CRUD PROGRAM
     // =========================
@@ -214,6 +214,25 @@ Route::prefix('admin_pusat')->group(function () {
     Route::delete('/peraturan/{id}', [PeraturanController::class, 'destroy'])
         ->name('admin_pusat.peraturan.destroy');
 
+    // =========================
+    // CRUD KAWASAN
+    // =========================
+
+    Route::get('/kawasan', [KawasanController::class, 'index'])
+        ->name('admin_pusat.kawasan.index');
+
+    Route::post('/kawasan', [KawasanController::class, 'store'])
+        ->name('admin_pusat.kawasan.store');
+
+    Route::get('/kawasan/{id}', [KawasanController::class, 'show'])
+        ->name('admin_pusat.kawasan.show');
+
+    Route::put('/kawasan/{id}', [KawasanController::class, 'update'])
+        ->name('admin_pusat.kawasan.update');
+
+    Route::delete('/kawasan/{id}', [KawasanController::class, 'destroy'])
+        ->name('admin_pusat.kawasan.destroy');
+
 });
 // =========================
 // PROGRAM PUBLIK
@@ -236,6 +255,12 @@ Route::get('/edukasi/{id}', [EdukasiController::class, 'show']);
 Route::get('/peraturan', [PeraturanController::class, 'index']);
 Route::get('/peraturan/{id}', [PeraturanController::class, 'show']);
 
+// =========================
+// KAWASAN PUBLIK
+// =========================
+
+Route::get('/kawasan', [KawasanController::class, 'index']);
+Route::get('/kawasan/{id}', [KawasanController::class, 'show']);
 
 
 // admin_lapangan APIs (read-only mirrors), protected with same middleware + web session
@@ -833,84 +858,7 @@ Route::get('/peraturan/{id}', [PeraturanController::class, 'show']);
     
     
 
-    Route::get('/admin_pusat/kawasan', function () {
-        return response()->json(KawasanKonservasi::orderBy('id', 'desc')->get());
-    })->name('admin_pusat.kawasan.index');
-
-    Route::post('/admin_pusat/kawasan', function (Request $request) {
-        $request->validate([
-            'deskripsi' => 'nullable|string',
-            'luasKawasan' => 'nullable|numeric|min:0',
-            'jenisKawasan' => 'nullable|string|max:255',
-            'alamat' => 'nullable|string',
-            'kondisi' => 'nullable|string|max:255',
-            'status' => 'nullable|string|max:255',
-            'gambar' => 'nullable|image|mimes:jpeg,png,jpg,webp|max:2048',
-        ]);
-
-        $gambarName = null;
-        if ($request->hasFile('gambar')) {
-            $gambarName = time() . '_' . $request->gambar->getClientOriginalName();
-            $request->gambar->move(public_path('img'), $gambarName);
-        }
-
-        $kawasan = KawasanKonservasi::create([
-            'deskripsi' => $request->deskripsi,
-            'luasKawasan' => $request->luasKawasan,
-            'jenisKawasan' => $request->jenisKawasan,
-            'alamat' => $request->alamat,
-            'kondisi' => $request->kondisi,
-            'status' => $request->status,
-            'gambar' => $gambarName,
-        ]);
-
-        return response()->json($kawasan, 201);
-    })->name('admin_pusat.kawasan.store');
-
-    Route::match(['put', 'post'], '/admin_pusat/kawasan/{id}', function (Request $request, $id) {
-        $kawasan = KawasanKonservasi::findOrFail($id);
-
-        $request->validate([
-            'deskripsi' => 'nullable|string',
-            'luasKawasan' => 'nullable|numeric|min:0',
-            'jenisKawasan' => 'nullable|string|max:255',
-            'alamat' => 'nullable|string',
-            'kondisi' => 'nullable|string|max:255',
-            'status' => 'nullable|string|max:255',
-            'gambar' => 'nullable|image|mimes:jpeg,png,jpg,webp|max:2048',
-        ]);
-
-        $data = $request->only(['deskripsi', 'luasKawasan', 'jenisKawasan', 'alamat', 'kondisi', 'status']);
-
-        if ($request->hasFile('gambar')) {
-            // Delete old image
-            if ($kawasan->gambar && file_exists(public_path('img/' . $kawasan->gambar))) {
-                unlink(public_path('img/' . $kawasan->gambar));
-            }
-
-            $gambarName = time() . '_' . $request->gambar->getClientOriginalName();
-            $request->gambar->move(public_path('img'), $gambarName);
-            $data['gambar'] = $gambarName;
-        }
-
-        $kawasan->update($data);
-
-        return response()->json($kawasan);
-    })->name('admin_pusat.kawasan.update');
-
-    Route::delete('/admin_pusat/kawasan/{id}', function ($id) {
-        $kawasan = KawasanKonservasi::findOrFail($id);
-
-        // Delete image file
-        if ($kawasan->gambar && file_exists(public_path('img/' . $kawasan->gambar))) {
-            unlink(public_path('img/' . $kawasan->gambar));
-        }
-
-        $kawasan->delete();
-
-        return response()->json(['message' => 'Kawasan berhasil dihapus']);
-    })->name('admin_pusat.kawasan.destroy');
-
+   
     
     Route::get('/admin_pusat/standar-pelayanan', function () {
         return response()->json(Edukasi::where('kategori', 'Standar Pelayanan')->orderBy('id', 'desc')->get());

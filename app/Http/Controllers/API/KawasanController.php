@@ -1,0 +1,185 @@
+<?php
+
+namespace App\Http\Controllers\API;
+
+use App\Http\Controllers\Controller;
+use Illuminate\Http\Request;
+use App\Models\KawasanKonservasi;
+
+class KawasanController extends Controller
+{
+    // =========================
+    // INDEX
+    // =========================
+    public function index()
+    {
+        $data = KawasanKonservasi::orderBy('id', 'desc')->get();
+
+        return response()->json([
+            'success' => true,
+            'data' => $data
+        ]);
+    }
+
+    // =========================
+    // SHOW
+    // =========================
+    public function show($id)
+    {
+        $data = KawasanKonservasi::find($id);
+
+        if (!$data) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Kawasan tidak ditemukan'
+            ], 404);
+        }
+
+        return response()->json([
+            'success' => true,
+            'data' => $data
+        ]);
+    }
+
+    // =========================
+    // STORE
+    // =========================
+    public function store(Request $request)
+    {
+        $request->validate([
+            'deskripsi' => 'nullable|string',
+            'luasKawasan' => 'nullable|numeric|min:0',
+            'jenisKawasan' => 'nullable|string|max:255',
+            'alamat' => 'nullable|string',
+            'kondisi' => 'nullable|string|max:255',
+            'status' => 'nullable|string|max:255',
+            'gambar' => 'nullable|image|mimes:jpeg,png,jpg,webp|max:2048',
+        ]);
+
+        $gambarName = null;
+
+        // upload gambar
+        if ($request->hasFile('gambar')) {
+
+            $gambarName =
+                time() . '_' .
+                $request->gambar->getClientOriginalName();
+
+            $request->gambar->move(
+                public_path('img'),
+                $gambarName
+            );
+        }
+
+        $data = KawasanKonservasi::create([
+            'deskripsi' => $request->deskripsi,
+            'luasKawasan' => $request->luasKawasan,
+            'jenisKawasan' => $request->jenisKawasan,
+            'alamat' => $request->alamat,
+            'kondisi' => $request->kondisi,
+            'status' => $request->status,
+            'gambar' => $gambarName,
+        ]);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Kawasan berhasil ditambahkan',
+            'data' => $data
+        ], 201);
+    }
+
+    // =========================
+    // UPDATE
+    // =========================
+    public function update(Request $request, $id)
+    {
+        $data = KawasanKonservasi::find($id);
+
+        if (!$data) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Kawasan tidak ditemukan'
+            ], 404);
+        }
+
+        $request->validate([
+            'deskripsi' => 'nullable|string',
+            'luasKawasan' => 'nullable|numeric|min:0',
+            'jenisKawasan' => 'nullable|string|max:255',
+            'alamat' => 'nullable|string',
+            'kondisi' => 'nullable|string|max:255',
+            'status' => 'nullable|string|max:255',
+            'gambar' => 'nullable|image|mimes:jpeg,png,jpg,webp|max:2048',
+        ]);
+
+        $updateData = [
+            'deskripsi' => $request->deskripsi,
+            'luasKawasan' => $request->luasKawasan,
+            'jenisKawasan' => $request->jenisKawasan,
+            'alamat' => $request->alamat,
+            'kondisi' => $request->kondisi,
+            'status' => $request->status,
+        ];
+
+        // upload gambar baru
+        if ($request->hasFile('gambar')) {
+
+            // hapus gambar lama
+            if (
+                $data->gambar &&
+                file_exists(public_path('img/' . $data->gambar))
+            ) {
+                unlink(public_path('img/' . $data->gambar));
+            }
+
+            $gambarName =
+                time() . '_' .
+                $request->gambar->getClientOriginalName();
+
+            $request->gambar->move(
+                public_path('img'),
+                $gambarName
+            );
+
+            $updateData['gambar'] = $gambarName;
+        }
+
+        $data->update($updateData);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Kawasan berhasil diupdate',
+            'data' => $data
+        ]);
+    }
+
+    // =========================
+    // DELETE
+    // =========================
+    public function destroy($id)
+    {
+        $data = KawasanKonservasi::find($id);
+
+        if (!$data) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Kawasan tidak ditemukan'
+            ], 404);
+        }
+
+        // hapus gambar
+        if (
+            $data->gambar &&
+            file_exists(public_path('img/' . $data->gambar))
+        ) {
+            unlink(public_path('img/' . $data->gambar));
+        }
+
+        $data->delete();
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Kawasan berhasil dihapus'
+        ]);
+    }
+}

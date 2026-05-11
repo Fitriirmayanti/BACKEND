@@ -20,13 +20,13 @@ use App\Http\Controllers\Auth\VerifyEmailController;
 use App\Http\Controllers\Auth\EmailVerificationPromptController;
 use Illuminate\Support\Facades\Cookie;
 use Illuminate\Support\Facades\Hash;
-//use App\Http\Controllers\AdminPusat\LaporanKonservasiController;
 use App\Http\Controllers\API\LaporanKonservasiController;
 use App\Http\Controllers\API\PenggunaController;
 use App\Http\Controllers\API\ProgramController;
 use App\Http\Controllers\API\EdukasiController;
 use App\Http\Controllers\API\PeraturanController;
 use App\Http\Controllers\API\KawasanController;
+use App\Http\Controllers\API\GaleriController;
 
 Route::middleware('api')->group(function () {
     Route::get('/health', function () {
@@ -233,6 +233,25 @@ Route::prefix('admin_pusat')->group(function () {
     Route::delete('/kawasan/{id}', [KawasanController::class, 'destroy'])
         ->name('admin_pusat.kawasan.destroy');
 
+    // =========================
+    // CRUD GALERI
+    // =========================
+
+    Route::get('/galeri', [GaleriController::class, 'index'])
+        ->name('admin_pusat.galeri.index');
+
+    Route::post('/galeri', [GaleriController::class, 'store'])
+        ->name('admin_pusat.galeri.store');
+
+    Route::get('/galeri/{id}', [GaleriController::class, 'show'])
+        ->name('admin_pusat.galeri.show');
+
+    Route::put('/galeri/{id}', [GaleriController::class, 'update'])
+        ->name('admin_pusat.galeri.update');
+
+    Route::delete('/galeri/{id}', [GaleriController::class, 'destroy'])
+        ->name('admin_pusat.galeri.destroy');
+
 });
 // =========================
 // PROGRAM PUBLIK
@@ -261,6 +280,13 @@ Route::get('/peraturan/{id}', [PeraturanController::class, 'show']);
 
 Route::get('/kawasan', [KawasanController::class, 'index']);
 Route::get('/kawasan/{id}', [KawasanController::class, 'show']);
+
+// =========================
+// GALERI PUBLIK
+// =========================
+
+Route::get('/galeri', [GaleriController::class, 'index']);
+Route::get('/galeri/{id}', [GaleriController::class, 'show']);
 
 
 // admin_lapangan APIs (read-only mirrors), protected with same middleware + web session
@@ -620,11 +646,7 @@ Route::get('/kawasan/{id}', [KawasanController::class, 'show']);
 
 // admin_pusat APIs (read-only mirrors), protected with same middleware + web session
 //Route::middleware(['auth:sanctum', 'role:admin_pusat'])->group(function () {
-    Route::get('/test-galeri', function (Request $request) {
-        return response()->json([
-            'data' => Galeri::all()
-        ]);
-    });
+  
 
 
     Route::get('/admin_pusat/dashboard', function () {
@@ -660,50 +682,7 @@ Route::get('/kawasan/{id}', [KawasanController::class, 'show']);
 
     Route::middleware(['auth:sanctum'])->group(function () {
 
-    Route::get('/admin_pusat/galeri', function () {
-        return response()->json(Galeri::orderBy('id', 'desc')->get());
-    });
-
-    Route::post('/admin_pusat/galeri', function (Request $request) {
-        $request->validate([
-            'keygaleri' => 'required',
-            'judul' => 'required',
-            'gambar' => 'required|image',
-        ]);
-
-        $gambarName = time() . '_' . $request->gambar->getClientOriginalName();
-        $request->gambar->move(public_path('uploads/galeri'), $gambarName);
-
-        $galeri = Galeri::create([
-            'keygaleri' => $request->keygaleri,
-            'judul' => $request->judul,
-            'keterangan' => $request->deskripsi,
-            'gambar' => $gambarName,
-        ]);
-
-        return response()->json($galeri);
-    });
-
-    Route::post('/admin_pusat/galeri/{id}', function (Request $request, $id) {
-        $galeri = Galeri::findOrFail($id);
-
-        $galeri->update([
-            'judul' => $request->judul,
-            'keterangan' => $request->deskripsi,
-        ]);
-
-        return response()->json($galeri);
-    });
-
-    Route::delete('/admin_pusat/galeri/{id}', function ($id) {
-        $galeri = Galeri::findOrFail($id);
-        $galeri->delete();
-
-        return response()->json([
-            'message' => 'hapus berhasil'
-        ]);
-    });
-
+    
  });
 
  

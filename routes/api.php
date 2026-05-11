@@ -25,6 +25,7 @@ use App\Http\Controllers\API\LaporanKonservasiController;
 use App\Http\Controllers\API\PenggunaController;
 use App\Http\Controllers\API\ProgramController;
 use App\Http\Controllers\API\EdukasiController;
+use App\Http\Controllers\API\PeraturanController;
 
 Route::middleware('api')->group(function () {
     Route::get('/health', function () {
@@ -194,6 +195,25 @@ Route::prefix('admin_pusat')->group(function () {
     Route::delete('/edukasi/{id}', [EdukasiController::class, 'destroy'])
         ->name('admin_pusat.edukasi.destroy');
 
+    // =========================
+    // CRUD PERATURAN
+    // =========================
+
+    Route::get('/peraturan', [PeraturanController::class, 'index'])
+        ->name('admin_pusat.peraturan.index');
+
+    Route::post('/peraturan', [PeraturanController::class, 'store'])
+        ->name('admin_pusat.peraturan.store');
+
+    Route::get('/peraturan/{id}', [PeraturanController::class, 'show'])
+        ->name('admin_pusat.peraturan.show');
+
+    Route::put('/peraturan/{id}', [PeraturanController::class, 'update'])
+        ->name('admin_pusat.peraturan.update');
+
+    Route::delete('/peraturan/{id}', [PeraturanController::class, 'destroy'])
+        ->name('admin_pusat.peraturan.destroy');
+
 });
 // =========================
 // PROGRAM PUBLIK
@@ -209,6 +229,12 @@ Route::get('/program/{id}', [ProgramController::class, 'show']);
 Route::get('/edukasi', [EdukasiController::class, 'index']);
 Route::get('/edukasi/{id}', [EdukasiController::class, 'show']);
 
+// =========================
+// PERATURAN PUBLIK
+// =========================
+
+Route::get('/peraturan', [PeraturanController::class, 'index']);
+Route::get('/peraturan/{id}', [PeraturanController::class, 'show']);
 
 
 
@@ -885,70 +911,7 @@ Route::get('/edukasi/{id}', [EdukasiController::class, 'show']);
         return response()->json(['message' => 'Kawasan berhasil dihapus']);
     })->name('admin_pusat.kawasan.destroy');
 
-    Route::get('/admin_pusat/peraturan', function () {
-        return response()->json(Peraturan::orderBy('id', 'desc')->get());
-    })->name('admin_pusat.peraturan.index');
-
-    Route::post('/admin_pusat/peraturan', function (Request $request) {
-        $request->validate([
-            'nama' => 'required|string|max:255',
-            'deskripsi' => 'nullable|string',
-            'tahun' => 'nullable|integer|min:1900|max:2100',
-            'nomor' => 'nullable|string|max:255',
-            'file' => 'nullable|file|mimes:pdf,doc,docx|max:10240',
-        ]);
-
-        $fileName = null;
-        if ($request->hasFile('file')) {
-            $fileName = time() . '_' . $request->file->getClientOriginalName();
-            $request->file->move(public_path('uploads/peraturan'), $fileName);
-        }
-
-        $peraturan = Peraturan::create([
-            'nama' => $request->nama,
-            'deskripsi' => $request->deskripsi,
-            'tahun' => $request->tahun,
-            'nomor' => $request->nomor,
-            'file' => $fileName,
-        ]);
-
-        return response()->json($peraturan, 201);
-    })->name('admin_pusat.peraturan.store');
-
-    Route::match(['put', 'post'], '/admin_pusat/peraturan/{id}', function (Request $request, $id) {
-        $peraturan = Peraturan::findOrFail($id);
-
-        $data = $request->only(['nama', 'deskripsi', 'tahun', 'nomor']);
-
-        if ($request->hasFile('file')) {
-            // Delete old file
-            if ($peraturan->file && file_exists(public_path('uploads/peraturan/' . $peraturan->file))) {
-                unlink(public_path('uploads/peraturan/' . $peraturan->file));
-            }
-
-            $fileName = time() . '_' . $request->file->getClientOriginalName();
-            $request->file->move(public_path('uploads/peraturan'), $fileName);
-            $data['file'] = $fileName;
-        }
-
-        $peraturan->update($data);
-
-        return response()->json($peraturan);
-    })->name('admin_pusat.peraturan.update');
-
-    Route::delete('/admin_pusat/peraturan/{id}', function ($id) {
-        $peraturan = Peraturan::findOrFail($id);
-
-        // Delete file
-        if ($peraturan->file && file_exists(public_path('uploads/peraturan/' . $peraturan->file))) {
-            unlink(public_path('uploads/peraturan/' . $peraturan->file));
-        }
-
-        $peraturan->delete();
-
-        return response()->json(['message' => 'Peraturan berhasil dihapus']);
-    })->name('admin_pusat.peraturan.destroy');
-
+    
     Route::get('/admin_pusat/standar-pelayanan', function () {
         return response()->json(Edukasi::where('kategori', 'Standar Pelayanan')->orderBy('id', 'desc')->get());
     })->name('admin_pusat.standar-pelayanan.index');

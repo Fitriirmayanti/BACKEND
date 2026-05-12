@@ -8,7 +8,7 @@ use App\Models\Website;
 use App\Models\Edukasi;
 use App\Models\KawasanKonservasi;
 use App\Models\Peraturan;
-use App\Models\Customer;
+use App\Models\Masyarakat;
 use App\Models\User;
 use App\Models\LaporanKonservasi;
 use App\Http\Controllers\Auth\AuthenticatedSessionController;
@@ -68,7 +68,7 @@ Route::middleware('api')->group(function () {
             'pesan' => 'required|string',
         ]);
 
-        Customer::create([
+        masyarakat::create([
             'nama' => $validated['nama'],
             'email' => $validated['email'],
             'nohp' => $validated['nohp'],
@@ -650,7 +650,7 @@ Route::get('/galeri/{id}', [GaleriController::class, 'show']);
 
 
     Route::get('/admin_pusat/dashboard', function () {
-        $customer = Customer::count();
+        $masyarakat = masyarakat::count();
         $awal = date('Y-m-01');
         $akhir = date('Y-m-d');
 
@@ -670,7 +670,7 @@ Route::get('/galeri/{id}', [GaleriController::class, 'show']);
             ->pluck('daerahLokasi');
 
         return response()->json([
-            'customer' => $customer,
+            'masyarakat' => $masyarakat,
             'laporanTerakhir' => $laporanTerakhir,
             'laporanDisetujui' => $laporanDisetujui,
             'laporanTahunan' => $laporanTahunan,
@@ -686,16 +686,16 @@ Route::get('/galeri/{id}', [GaleriController::class, 'show']);
  });
 
  
-    Route::get('/admin_pusat/customer', function () {
-        return response()->json(Customer::orderBy('id', 'desc')->get());
-    })->name('admin_pusat.customer.index');
+    Route::get('/admin_pusat/masyarakat', function () {
+        return response()->json(masyarakat::orderBy('id', 'desc')->get());
+    })->name('admin_pusat.masyarakat.index');
 
-    Route::delete('/admin_pusat/customer/{id}', function ($id) {
-        $customer = Customer::findOrFail($id);
-        $customer->delete();
+    Route::delete('/admin_pusat/masyarakat/{id}', function ($id) {
+        $masyarakat = masyarakat::findOrFail($id);
+        $masyarakat->delete();
 
-        return response()->json(['message' => 'Customer berhasil dihapus']);
-    })->name('admin_pusat.customer.destroy');
+        return response()->json(['message' => 'masyarakat berhasil dihapus']);
+    })->name('admin_pusat.masyarakat.destroy');
 
     
 

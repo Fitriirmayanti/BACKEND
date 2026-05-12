@@ -1,6 +1,6 @@
 <?php
 
-use App\Http\Controllers\AdminPusat\CustomerController;
+use App\Http\Controllers\AdminPusat\masyarakatController;
 use App\Http\Controllers\AdminPusat\DashboardController;
 use App\Http\Controllers\AdminPusat\EdukasiController;
 use App\Http\Controllers\AdminPusat\GaleriController;
@@ -20,8 +20,8 @@ Route::middleware(['auth', 'role:admin_pusat'])->group(function () {
     //Route::resource('/admin_pusat/galeri', GaleriController::class)
         //->names('admin_pusat.galeri');
 
-    //Route::resource('/admin_pusat/customer', CustomerController::class)
-      //  ->names('admin_pusat.customer');
+    //Route::resource('/admin_pusat/masyarakat', masyarakatController::class)
+      //  ->names('admin_pusat.masyarakat');
 
     //Route::resource('/admin_pusat/pengguna', PenggunaController::class)
        // ->names('admin_pusat.pengguna');

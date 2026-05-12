@@ -4,7 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\Galeri;
-use App\Models\Customer;
+use App\Models\Masyarakat;
 use App\Models\Website;
 use App\Models\Edukasi;
 use App\Models\KawasanKonservasi;
@@ -118,7 +118,7 @@ class HomeController extends Controller
             'pesan'    => 'required|string',
         ]);
 
-        Customer::create([
+        masyarakat::create([
             'nama'       => $request->nama,
             'email'      => $request->email,
             'nohp'       => $request->nohp,

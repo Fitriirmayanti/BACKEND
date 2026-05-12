@@ -4,7 +4,7 @@ namespace App\Http\Controllers\AdminPusat;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
-use App\Models\Customer;
+use App\Models\Masyarakat;
 use App\Models\LaporanKonservasi;
 use Illuminate\Support\Str;
 

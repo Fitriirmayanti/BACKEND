@@ -3,7 +3,7 @@
 namespace App\Http\Controllers\AdminPusat;
 
 use App\Http\Controllers\Controller;
-use App\Models\Customer;
+use App\Models\Masyarakat;
 use App\Models\Edukasi;
 use App\Models\LaporanKonservasi;
 
@@ -11,7 +11,7 @@ class DashboardController extends Controller
 {
     public function index()
     {
-        $customer = Customer::count();
+        $masyarakat = Masyarakat::count();
 
         $awal = date('Y-m-01');
         $akhir = date('Y-m-d');
@@ -34,7 +34,7 @@ class DashboardController extends Controller
         return view('admin_pusat.dashboard', [
             'title' => 'admin_pusat',
             'active' => 'Dashboard admin_pusat',
-            'customer' => $customer,
+            'masyarakat' => $masyarakat,
             'laporanTerakhir' => $laporanTerakhir,
             'laporanDisetujui' => $laporanDisetujui,
             'laporanTahunan' => $laporanTahunan,

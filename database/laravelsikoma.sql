@@ -52,11 +52,11 @@ CREATE TABLE IF NOT EXISTS `cache_locks` (
 -- --------------------------------------------------------
 
 --
--- Table structure for table `customer`
+-- Table structure for table `masyarakat`
 --
 
-DROP TABLE IF EXISTS `customer`;
-CREATE TABLE IF NOT EXISTS `customer` (
+DROP TABLE IF EXISTS `masyarakat`;
+CREATE TABLE IF NOT EXISTS `masyarakat` (
   `id` int NOT NULL AUTO_INCREMENT,
   `nama` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
   `email` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,

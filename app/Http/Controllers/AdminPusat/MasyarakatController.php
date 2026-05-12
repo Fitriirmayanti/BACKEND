@@ -4,19 +4,19 @@ namespace App\Http\Controllers\AdminPusat;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
-use App\Models\Customer;
+use App\Models\Masyarakat;
 use Illuminate\Support\Str;
 
-class CustomerController extends Controller
+class masyarakatController extends Controller
 {
 
     public function index()
     {
-        $customer = Customer::all();
-        return view('admin_pusat.customer', [
-            'title' => 'Customer',
+        $masyarakat = masyarakat::all();
+        return view('admin_pusat.masyarakat', [
+            'title' => 'masyarakat',
             'active' => 'Index',
-            'customer' => $customer,
+            'masyarakat' => $masyarakat,
             'user' => auth()->user(),
         ]);
     }
@@ -54,10 +54,10 @@ class CustomerController extends Controller
 
     public function destroy(string $id)
     {
-        $customer = Customer::findOrFail($id);
+        $masyarakat = masyarakat::findOrFail($id);
 
-        $customer->delete();
+        $masyarakat->delete();
 
-        return redirect()->back()->with('success', 'Customer berhasil dihapus.');
+        return redirect()->back()->with('success', 'masyarakat berhasil dihapus.');
     }
 }

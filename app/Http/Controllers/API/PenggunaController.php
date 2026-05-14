@@ -71,12 +71,10 @@ class PenggunaController extends Controller
         ], 201);
     }
 
-    // ✅ UPDATE
     public function update(Request $request, $id)
     {
         $data = User::find($id);
 
-        // ❌ user tidak ditemukan
         if (!$data) {
             return response()->json([
                 'success' => false,
@@ -84,31 +82,24 @@ class PenggunaController extends Controller
             ], 404);
         }
 
-        // ✅ validasi
         $request->validate([
             'name' => 'required|string|max:255',
             'username' => 'required|string|max:255|unique:users,username,' . $id,
             'email' => 'required|email|unique:users,email,' . $id,
-         
             'password' => 'nullable|min:6',
             'role' => 'required|in:admin_pusat,admin_lapangan',
         ]);
 
-        // ✅ data update
-        $updateData = [
-            'name' => $request->name,
-            'username' => $request->username,
-            'email' => $request->email,
-            
-            'role' => $request->role,
-        ];
+        $data->name = $request->name;
+        $data->username = $request->username;
+        $data->email = $request->email;
+        $data->role = $request->role;
 
-        // 🔥 update password jika diisi
         if ($request->filled('password')) {
-            $updateData['password'] = Hash::make($request->password);
+            $data->password = Hash::make($request->password);
         }
 
-        $data->update($updateData);
+        $data->save();
 
         return response()->json([
             'success' => true,

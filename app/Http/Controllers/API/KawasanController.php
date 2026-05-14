@@ -66,7 +66,7 @@ class KawasanController extends Controller
                 $request->gambar->getClientOriginalName();
 
             $request->gambar->move(
-                public_path('img'),
+                public_path('uploads/kawasan'),
                 $gambarName
             );
         }
@@ -127,9 +127,9 @@ class KawasanController extends Controller
             // hapus gambar lama
             if (
                 $data->gambar &&
-                file_exists(public_path('img/' . $data->gambar))
+                file_exists(public_path('uploads/kawasan/' . $data->gambar))
             ) {
-                unlink(public_path('img/' . $data->gambar));
+                unlink(public_path('uploads/kawasan/' . $data->gambar));
             }
 
             $gambarName =
@@ -137,7 +137,7 @@ class KawasanController extends Controller
                 $request->gambar->getClientOriginalName();
 
             $request->gambar->move(
-                public_path('img'),
+                public_path('uploads/kawasan'),
                 $gambarName
             );
 
@@ -170,9 +170,9 @@ class KawasanController extends Controller
         // hapus gambar
         if (
             $data->gambar &&
-            file_exists(public_path('img/' . $data->gambar))
+            file_exists(public_path('uploads/kawasan/' . $data->gambar))
         ) {
-            unlink(public_path('img/' . $data->gambar));
+            unlink(public_path('uploads/kawasan/' . $data->gambar));
         }
 
         $data->delete();

@@ -330,41 +330,74 @@ class LaporanKonservasiController extends Controller
             'keterangan' => $validated['keterangan'],
         ]);
 
-        // 🔥 folder upload
-        if (!file_exists(public_path('uploads/laporan'))) {
-            mkdir(public_path('uploads/laporan'), 0777, true);
+        // 🔥 folder upload (SAMAKAN DENGAN STORE)
+        $destination = '/home/codg6743/public_html/uploads/laporan';
+
+        // 🔥 pastikan folder ada
+        if (!file_exists($destination)) {
+            mkdir($destination, 0777, true);
         }
 
-        // 🔥 helper
-        $deleteOldFile = function ($filename) {
-            $path = public_path('uploads/laporan/' . $filename);
+        // 🔥 helper hapus file lama
+        $deleteOldFile = function ($filename) use ($destination) {
+
+            $path = $destination . '/' . $filename;
+
             if ($filename && file_exists($path)) {
                 unlink($path);
             }
         };
 
-        $uploadFile = function ($file) {
-            $filename = time().'_'.uniqid().'_'.$file->getClientOriginalName();
-            $file->move(public_path('uploads/laporan'), $filename);
-            return $filename;
+        // 🔥 helper upload file
+        $uploadFile = function ($file, $prefix) use ($destination) {
+
+            $filename = time() . '_' . $prefix . '_' . uniqid() . '.' . $file->getClientOriginalExtension();
+
+            $uploaded = $file->move($destination, $filename);
+
+            if ($uploaded) {
+                return $filename;
+            }
+
+            return null;
         };
 
-        // 🔥 update file
+        // 🔥 update surat tugas
         if ($request->file('suratTugas')) {
+
             $deleteOldFile($data->suratTugas);
-            $data->suratTugas = $uploadFile($request->file('suratTugas'));
+
+            $uploaded = $uploadFile($request->file('suratTugas'), 'surat');
+
+            if ($uploaded) {
+                $data->suratTugas = $uploaded;
+            }
         }
 
+        // 🔥 update foto sebelum
         if ($request->file('fotoSebelum')) {
+
             $deleteOldFile($data->fotoSebelum);
-            $data->fotoSebelum = $uploadFile($request->file('fotoSebelum'));
+
+            $uploaded = $uploadFile($request->file('fotoSebelum'), 'fotoSebelum');
+
+            if ($uploaded) {
+                $data->fotoSebelum = $uploaded;
+            }
         }
 
+        // 🔥 update foto setelah
         if ($request->file('fotoSetelah')) {
-            $deleteOldFile($data->fotoSetelah);
-            $data->fotoSetelah = $uploadFile($request->file('fotoSetelah'));
-        }
 
+            $deleteOldFile($data->fotoSetelah);
+
+            $uploaded = $uploadFile($request->file('fotoSetelah'), 'fotoSetelah');
+
+            if ($uploaded) {
+                $data->fotoSetelah = $uploaded;
+            }
+        }
+        
         // 🔥 reset ke pending jika sebelumnya ditolak
         if ($data->status == 2) {
             $data->status = 0;

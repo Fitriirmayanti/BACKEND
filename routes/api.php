@@ -126,133 +126,76 @@ Route::prefix('laporan-konservasi')->middleware('auth:sanctum')->group(function 
 
     // 🧑‍💼 ADMIN PUSAT
     Route::middleware('role:admin_pusat')->group(function () {
+        // =========================
+        // UPDATE STATUS LAPORAN
+        // =========================
         Route::put('/{id}/status', [LaporanKonservasiController::class, 'updateStatus']);
+        // ===============================
+        // CRUD PENGGUNA
+        // ===============================
+
+        Route::get('/pengguna', [PenggunaController::class, 'index']);
+        Route::get('/pengguna/{id}', [PenggunaController::class, 'show']);
+        Route::post('/pengguna', [PenggunaController::class, 'store']);
+        Route::put('/pengguna/{id}', [PenggunaController::class, 'update']);
+        Route::delete('/pengguna/{id}', [PenggunaController::class, 'destroy']);
+
+        // =========================
+        // CRUD PROGRAM
+        // =========================
+
+        Route::get('/program', [ProgramController::class, 'index']);
+        Route::post('/program', [ProgramController::class, 'store']);
+        Route::get('/program/{id}', [ProgramController::class, 'show']);
+        Route::put('/program/{id}', [ProgramController::class, 'update']);
+        Route::delete('/program/{id}', [ProgramController::class, 'destroy']);
+
+        // =========================
+        // CRUD EDUKASI
+        // =========================
+
+        Route::get('/edukasi', [EdukasiController::class, 'index']);
+        Route::post('/edukasi', [EdukasiController::class, 'store']);
+        Route::get('/edukasi/{id}', [EdukasiController::class, 'show']);
+        Route::put('/edukasi/{id}', [EdukasiController::class, 'update']);
+        Route::delete('/edukasi/{id}', [EdukasiController::class, 'destroy']);
+
+        // =========================
+        // CRUD PERATURAN
+        // =========================
+
+        Route::get('/peraturan', [PeraturanController::class, 'index']);
+        Route::post('/peraturan', [PeraturanController::class, 'store']);
+        Route::get('/peraturan/{id}', [PeraturanController::class, 'show']);
+        Route::put('/peraturan/{id}', [PeraturanController::class, 'update']);
+        Route::delete('/peraturan/{id}', [PeraturanController::class, 'destroy']);
+
+        // =========================
+        // CRUD KAWASAN
+        // =========================
+
+        Route::get('/kawasan', [KawasanController::class, 'index']);
+        Route::post('/kawasan', [KawasanController::class, 'store']);
+        Route::get('/kawasan/{id}', [KawasanController::class, 'show']);
+        Route::put('/kawasan/{id}', [KawasanController::class, 'update']);
+        Route::delete('/kawasan/{id}', [KawasanController::class, 'destroy']);
+
+        // =========================
+        // CRUD GALERI
+        // =========================
+
+        Route::get('/galeri', [GaleriController::class, 'index']);
+        Route::post('/galeri', [GaleriController::class, 'store']);
+        Route::get('/galeri/{id}', [GaleriController::class, 'show']);
+        Route::put('/galeri/{id}', [GaleriController::class, 'update']);
+        Route::delete('/galeri/{id}', [GaleriController::class, 'destroy']);
+            
         
     });
 
 });
 
-// ===============================
-// ADMIN PUSAT
-// ===============================
 
-Route::prefix('admin_pusat')->group(function () {
-
-    // ===============================
-    // CRUD PENGGUNA
-    // ===============================
-
-    Route::get('/pengguna', [PenggunaController::class, 'index'])
-        ->name('admin_pusat.pengguna.index');
-
-    Route::get('/pengguna/{id}', [PenggunaController::class, 'show'])
-        ->name('admin_pusat.pengguna.show');
-
-    Route::post('/pengguna', [PenggunaController::class, 'store'])
-        ->name('admin_pusat.pengguna.store');
-
-    Route::put('/pengguna/{id}', [PenggunaController::class, 'update'])
-        ->name('admin_pusat.pengguna.update');
-
-    Route::delete('/pengguna/{id}', [PenggunaController::class, 'destroy'])
-        ->name('admin_pusat.pengguna.destroy');
-
-    // =========================
-    // CRUD PROGRAM
-    // =========================
-
-    Route::get('/program', [ProgramController::class, 'index'])
-        ->name('admin_pusat.program.index');
-
-    Route::post('/program', [ProgramController::class, 'store'])
-        ->name('admin_pusat.program.store');
-
-    Route::get('/program/{id}', [ProgramController::class, 'show'])
-        ->name('admin_pusat.program.show');
-
-    Route::put('/program/{id}', [ProgramController::class, 'update'])
-        ->name('admin_pusat.program.update');
-
-    Route::delete('/program/{id}', [ProgramController::class, 'destroy'])
-        ->name('admin_pusat.program.destroy');
-
-    // =========================
-    // CRUD EDUKASI
-    // =========================
-
-    Route::get('/edukasi', [EdukasiController::class, 'index'])
-        ->name('admin_pusat.edukasi.index');
-
-    Route::post('/edukasi', [EdukasiController::class, 'store'])
-        ->name('admin_pusat.edukasi.store');
-
-    Route::get('/edukasi/{id}', [EdukasiController::class, 'show'])
-        ->name('admin_pusat.edukasi.show');
-
-    Route::put('/edukasi/{id}', [EdukasiController::class, 'update'])
-        ->name('admin_pusat.edukasi.update');
-
-    Route::delete('/edukasi/{id}', [EdukasiController::class, 'destroy'])
-        ->name('admin_pusat.edukasi.destroy');
-
-    // =========================
-    // CRUD PERATURAN
-    // =========================
-
-    Route::get('/peraturan', [PeraturanController::class, 'index'])
-        ->name('admin_pusat.peraturan.index');
-
-    Route::post('/peraturan', [PeraturanController::class, 'store'])
-        ->name('admin_pusat.peraturan.store');
-
-    Route::get('/peraturan/{id}', [PeraturanController::class, 'show'])
-        ->name('admin_pusat.peraturan.show');
-
-    Route::put('/peraturan/{id}', [PeraturanController::class, 'update'])
-        ->name('admin_pusat.peraturan.update');
-
-    Route::delete('/peraturan/{id}', [PeraturanController::class, 'destroy'])
-        ->name('admin_pusat.peraturan.destroy');
-
-    // =========================
-    // CRUD KAWASAN
-    // =========================
-
-    Route::get('/kawasan', [KawasanController::class, 'index'])
-        ->name('admin_pusat.kawasan.index');
-
-    Route::post('/kawasan', [KawasanController::class, 'store'])
-        ->name('admin_pusat.kawasan.store');
-
-    Route::get('/kawasan/{id}', [KawasanController::class, 'show'])
-        ->name('admin_pusat.kawasan.show');
-
-    Route::put('/kawasan/{id}', [KawasanController::class, 'update'])
-        ->name('admin_pusat.kawasan.update');
-
-    Route::delete('/kawasan/{id}', [KawasanController::class, 'destroy'])
-        ->name('admin_pusat.kawasan.destroy');
-
-    // =========================
-    // CRUD GALERI
-    // =========================
-
-    Route::get('/galeri', [GaleriController::class, 'index'])
-        ->name('admin_pusat.galeri.index');
-
-    Route::post('/galeri', [GaleriController::class, 'store'])
-        ->name('admin_pusat.galeri.store');
-
-    Route::get('/galeri/{id}', [GaleriController::class, 'show'])
-        ->name('admin_pusat.galeri.show');
-
-    Route::put('/galeri/{id}', [GaleriController::class, 'update'])
-        ->name('admin_pusat.galeri.update');
-
-    Route::delete('/galeri/{id}', [GaleriController::class, 'destroy'])
-        ->name('admin_pusat.galeri.destroy');
-
-});
 // =========================
 // PROGRAM PUBLIK
 // =========================

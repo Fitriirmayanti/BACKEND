@@ -27,6 +27,7 @@ use App\Http\Controllers\API\EdukasiController;
 use App\Http\Controllers\API\PeraturanController;
 use App\Http\Controllers\API\KawasanController;
 use App\Http\Controllers\API\GaleriController;
+use App\Http\Controllers\API\StandarPelayananController;
 
 Route::middleware('api')->group(function () {
     Route::get('/health', function () {
@@ -50,34 +51,8 @@ Route::middleware('api')->group(function () {
         return response()->json(compact('satwa', 'executive', 'peraturan', 'kawasan'));
     });
 
-    Route::get('/standar-pelayanan', function () {
-        $standarPelayanan = Edukasi::where('kategori', 'Standar Pelayanan')->orderBy('id', 'desc')->get();
-        return response()->json([
-            'data' => $standarPelayanan,
-            'message' => 'Data standar pelayanan berhasil dimuat'
-        ]);
-    });
-
-    // Simpan pesan (mirror POST /simpanPesan)
-    Route::post('/simpan-pesan', function (Request $request) {
-        $validated = $request->validate([
-            'nama' => 'required|string|max:255',
-            'email' => 'required|email|max:255',
-            'nohp' => 'required|string|max:20',
-            'judul' => 'required|string',
-            'pesan' => 'required|string',
-        ]);
-
-        masyarakat::create([
-            'nama' => $validated['nama'],
-            'email' => $validated['email'],
-            'nohp' => $validated['nohp'],
-            'negara' => $validated['judul'],
-            'pesan' => $validated['pesan'],
-        ]);
-
-        return response()->json(['message' => 'Pesan anda telah terkirim.']);
-    });
+  
+    
 });
 
 // Provide CSRF cookie for SPA (if Sanctum not installed)
@@ -111,25 +86,41 @@ Route::middleware(['api'])->group(function () {
     Route::post('/auth/logout', [AuthenticatedSessionController::class, 'destroy'])->name('api.logout');
 });
 
-Route::prefix('laporan-konservasi')->middleware('auth:sanctum')->group(function () {
+// =====================================================
+// LAPORAN KONSERVASI
+// =====================================================
 
-    // 🔥 SEMUA ROLE BISA AKSES (logic di controller)
-    Route::get('/', [LaporanKonservasiController::class, 'index']);
-    Route::get('/{id}', [LaporanKonservasiController::class, 'show']);
+Route::middleware('auth:sanctum')->group(function () {
 
-    // 👷 ADMIN LAPANGAN
+    // 🔥 SEMUA ROLE BISA AKSES
+    Route::get('/laporan-konservasi', [LaporanKonservasiController::class, 'index']);
+    Route::get('/laporan-konservasi/{id}', [LaporanKonservasiController::class, 'show']);
+
+    // =====================================================
+    // ADMIN LAPANGAN
+    // =====================================================
+
     Route::middleware('role:admin_lapangan')->group(function () {
-        Route::post('/', [LaporanKonservasiController::class, 'store']);
-        Route::put('/{id}', [LaporanKonservasiController::class, 'update']);
-        Route::delete('/{id}', [LaporanKonservasiController::class, 'destroy']);
+
+        Route::post('/laporan-konservasi', [LaporanKonservasiController::class, 'store']);
+
+        Route::put('/laporan-konservasi/{id}', [LaporanKonservasiController::class, 'update']);
+
+        Route::delete('/laporan-konservasi/{id}', [LaporanKonservasiController::class, 'destroy']);
     });
 
-    // 🧑‍💼 ADMIN PUSAT
+    // =====================================================
+    // ADMIN PUSAT
+    // =====================================================
+
     Route::middleware('role:admin_pusat')->group(function () {
+
         // =========================
         // UPDATE STATUS LAPORAN
         // =========================
-        Route::put('/{id}/status', [LaporanKonservasiController::class, 'updateStatus']);
+
+        Route::put('/laporan-konservasi/{id}/status', [LaporanKonservasiController::class, 'updateStatus']);
+
         // ===============================
         // CRUD PENGGUNA
         // ===============================
@@ -189,12 +180,21 @@ Route::prefix('laporan-konservasi')->middleware('auth:sanctum')->group(function 
         Route::get('/galeri/{id}', [GaleriController::class, 'show']);
         Route::put('/galeri/{id}', [GaleriController::class, 'update']);
         Route::delete('/galeri/{id}', [GaleriController::class, 'destroy']);
-            
-        
-    });
 
+        // =========================
+        // VIEW STANDAR PELAYANAN
+        // =========================
+
+        Route::get('/standar-pelayanan', [StandarPelayananController::class, 'index']);
+    });
 });
 
+
+// =========================
+// MASYARAKAT KIRIM SARAN
+// =========================
+
+Route::post('/standar-pelayanan', [StandarPelayananController::class, 'store']);
 
 // =========================
 // PROGRAM PUBLIK
@@ -782,57 +782,7 @@ Route::get('/galeri/{id}', [GaleriController::class, 'show']);
 
    
     
-    Route::get('/admin_pusat/standar-pelayanan', function () {
-        return response()->json(Edukasi::where('kategori', 'Standar Pelayanan')->orderBy('id', 'desc')->get());
-    })->name('admin_pusat.standar-pelayanan.index');
-
-    Route::post('/admin_pusat/standar-pelayanan', function (Request $request) {
-
-        $request->validate([
-            'judul' => 'required|string|max:255',
-            'deskripsi' => 'nullable|string',
-            'kategori' => 'required|string|max:255',
-            'foto' => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
-        ]);
-
-        // upload foto
-        if ($request->hasFile('foto')) {
-            $file = $request->file('foto');
-            $filename = time() . '.' . $file->getClientOriginalExtension();
-            $file->move(public_path('uploads/edukasi'), $filename);
-        } else {
-            $filename = null;
-        }
-
-        $edukasi = Edukasi::create([
-            'judul' => $request->judul,
-            'slug' => Str::slug($request->judul),
-            'deskripsi' => $request->deskripsi,
-            'kategori' => $request->kategori,
-            'foto' => $filename,
-            'keygaleri' => Str::random(8), // 🔥 INI WAJIB
-        ]);
-
-        return response()->json($edukasi, 201);
-    });
-
-    Route::match(['put', 'post'], '/admin_pusat/standar-pelayanan/{id}', function (Request $request, $id) {
-        $edukasi = Edukasi::findOrFail($id);
-
-        $data = $request->only(['judul', 'deskripsi', 'kategori']);
-        $data['slug'] = Str::slug($request->judul);
-
-        $edukasi->update($data);
-
-        return response()->json($edukasi);
-    })->name('admin_pusat.standar-pelayanan.update');
-
-    Route::delete('/admin_pusat/standar-pelayanan/{id}', function ($id) {
-        $edukasi = Edukasi::findOrFail($id);
-        $edukasi->delete();
-
-        return response()->json(['message' => 'Standar pelayanan berhasil dihapus']);
-    })->name('admin_pusat.standar-pelayanan.destroy');
+    
 
  // });
     

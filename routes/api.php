@@ -94,7 +94,7 @@ Route::middleware(['api'])->group(function () {
 
 Route::middleware('auth:sanctum')->group(function () {
 
-    // 🔥 SEMUA ROLE BISA AKSES
+    // 🔥 SEMUA ROLE BISA AKSES/public
     Route::get('/laporan-konservasi', [LaporanKonservasiController::class, 'index']);
     Route::get('/laporan-konservasi/{id}', [LaporanKonservasiController::class, 'show']);
 

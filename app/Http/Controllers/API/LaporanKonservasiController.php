@@ -422,6 +422,7 @@ class LaporanKonservasiController extends Controller
 
 
 
+    
     // ✅ DELETE (FINAL + VALIDASI STATUS)
     public function destroy(Request $request, $id)
     {
@@ -452,10 +453,16 @@ class LaporanKonservasiController extends Controller
             ], 400);
         }
 
+        // 🔥 path folder upload cPanel
+        $destination = '/home/codg6743/public_html/uploads/laporan';
+
         // 🔥 hapus file
         foreach (['suratTugas', 'fotoSebelum', 'fotoSetelah'] as $field) {
+
             if ($data->$field) {
-                $path = public_path('uploads/laporan/' . $data->$field);
+
+                $path = $destination . '/' . $data->$field;
+
                 if (file_exists($path)) {
                     unlink($path);
                 }
@@ -467,10 +474,8 @@ class LaporanKonservasiController extends Controller
         return response()->json([
             'success' => true,
             'message' => 'Laporan berhasil dihapus'
-      
-            ]);
+        ]);
     }
-
 
     public function updateStatus(Request $request, $id) 
     {

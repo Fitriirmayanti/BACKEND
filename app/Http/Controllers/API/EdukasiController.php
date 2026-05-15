@@ -64,11 +64,21 @@ class EdukasiController extends Controller
 
             $fotoName = time() . '.' . $request->foto->extension();
 
+            // 🔥 path upload cPanel
+            $destination = '/home/codg6743/public_html/uploads/edukasi';
+
+            // 🔥 pastikan folder ada
+            if (!file_exists($destination)) {
+                mkdir($destination, 0777, true);
+            }
+
+            // 🔥 upload foto
             $request->foto->move(
-                public_path('uploads/edukasi'),
+                $destination,
                 $fotoName
             );
         }
+
 
         // slug unik
         $slug = Str::slug($request->judul);
@@ -135,18 +145,27 @@ class EdukasiController extends Controller
         // upload foto baru
         if ($request->hasFile('foto')) {
 
-            // hapus foto lama
+            // 🔥 path upload cPanel
+            $destination = '/home/codg6743/public_html/uploads/edukasi';
+
+            // 🔥 pastikan folder ada
+            if (!file_exists($destination)) {
+                mkdir($destination, 0777, true);
+            }
+
+            // 🔥 hapus foto lama
             if (
                 $data->foto &&
-                file_exists(public_path('uploads/edukasi/' . $data->foto))
+                file_exists($destination . '/' . $data->foto)
             ) {
-                unlink(public_path('uploads/edukasi/' . $data->foto));
+                unlink($destination . '/' . $data->foto);
             }
 
             $fotoName = time() . '.' . $request->foto->extension();
 
+            // 🔥 upload foto baru
             $request->foto->move(
-                public_path('uploads/edukasi'),
+                $destination,
                 $fotoName
             );
 
@@ -176,12 +195,15 @@ class EdukasiController extends Controller
             ], 404);
         }
 
-        // hapus foto
+        // 🔥 path upload cPanel
+        $destination = '/home/codg6743/public_html/uploads/edukasi';
+
+        // 🔥 hapus foto
         if (
             $data->foto &&
-            file_exists(public_path('uploads/edukasi/' . $data->foto))
+            file_exists($destination . '/' . $data->foto)
         ) {
-            unlink(public_path('uploads/edukasi/' . $data->foto));
+            unlink($destination . '/' . $data->foto);
         }
 
         $data->delete();

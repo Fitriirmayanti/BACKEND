@@ -49,4 +49,21 @@ class StandarPelayananController extends Controller
             'data' => $data
         ]);
     }
+
+    public function show($id)
+    {
+        $data = StandarPelayanan::find($id);
+
+        if (!$data) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Data tidak ditemukan'
+            ], 404);
+        }
+
+        return response()->json([
+            'success' => true,
+            'data' => $data
+        ]);
+    }
 }

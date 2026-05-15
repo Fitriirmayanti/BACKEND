@@ -183,6 +183,7 @@ Route::middleware('auth:sanctum')->group(function () {
         // =========================
 
         Route::get('/standar-pelayanan', [StandarPelayananController::class, 'index']);
+        Route::get('/standar-pelayanan/{id}', [StandarPelayananController::class, 'show']);
     });
 });
 

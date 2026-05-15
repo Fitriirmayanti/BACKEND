@@ -65,11 +65,21 @@ class KawasanController extends Controller
                 time() . '_' .
                 $request->gambar->getClientOriginalName();
 
+            // 🔥 path upload cPanel
+            $destination = '/home/codg6743/public_html/uploads/kawasan';
+
+            // 🔥 pastikan folder ada
+            if (!file_exists($destination)) {
+                mkdir($destination, 0777, true);
+            }
+
+            // 🔥 upload gambar
             $request->gambar->move(
-                public_path('uploads/kawasan'),
+                $destination,
                 $gambarName
             );
         }
+
 
         $data = KawasanKonservasi::create([
             'deskripsi' => $request->deskripsi,
@@ -124,20 +134,29 @@ class KawasanController extends Controller
         // upload gambar baru
         if ($request->hasFile('gambar')) {
 
-            // hapus gambar lama
+            // 🔥 path upload cPanel
+            $destination = '/home/codg6743/public_html/uploads/kawasan';
+
+            // 🔥 pastikan folder ada
+            if (!file_exists($destination)) {
+                mkdir($destination, 0777, true);
+            }
+
+            // 🔥 hapus gambar lama
             if (
                 $data->gambar &&
-                file_exists(public_path('uploads/kawasan/' . $data->gambar))
+                file_exists($destination . '/' . $data->gambar)
             ) {
-                unlink(public_path('uploads/kawasan/' . $data->gambar));
+                unlink($destination . '/' . $data->gambar);
             }
 
             $gambarName =
                 time() . '_' .
                 $request->gambar->getClientOriginalName();
 
+            // 🔥 upload gambar baru
             $request->gambar->move(
-                public_path('uploads/kawasan'),
+                $destination,
                 $gambarName
             );
 
@@ -167,12 +186,15 @@ class KawasanController extends Controller
             ], 404);
         }
 
-        // hapus gambar
+        // 🔥 path upload cPanel
+        $destination = '/home/codg6743/public_html/uploads/kawasan';
+
+        // 🔥 hapus gambar
         if (
             $data->gambar &&
-            file_exists(public_path('uploads/kawasan/' . $data->gambar))
+            file_exists($destination . '/' . $data->gambar)
         ) {
-            unlink(public_path('uploads/kawasan/' . $data->gambar));
+            unlink($destination . '/' . $data->gambar);
         }
 
         $data->delete();

@@ -69,8 +69,17 @@ class PeraturanController extends Controller
                 . '.' .
                 $file->getClientOriginalExtension();
 
+            // 🔥 path upload cPanel
+            $destination = '/home/codg6743/public_html/uploads/peraturan';
+
+            // 🔥 pastikan folder ada
+            if (!file_exists($destination)) {
+                mkdir($destination, 0777, true);
+            }
+
+            // 🔥 upload file
             $file->move(
-                public_path('uploads/peraturan'),
+                $destination,
                 $fileName
             );
         }
@@ -122,12 +131,20 @@ class PeraturanController extends Controller
         // upload file baru
         if ($request->hasFile('file')) {
 
-            // hapus file lama
+            // 🔥 path upload cPanel
+            $destination = '/home/codg6743/public_html/uploads/peraturan';
+
+            // 🔥 pastikan folder ada
+            if (!file_exists($destination)) {
+                mkdir($destination, 0777, true);
+            }
+
+            // 🔥 hapus file lama
             if (
                 $data->file &&
-                file_exists(public_path('uploads/peraturan/' . $data->file))
+                file_exists($destination . '/' . $data->file)
             ) {
-                unlink(public_path('uploads/peraturan/' . $data->file));
+                unlink($destination . '/' . $data->file);
             }
 
             $file = $request->file('file');
@@ -139,8 +156,9 @@ class PeraturanController extends Controller
                 . '.' .
                 $file->getClientOriginalExtension();
 
+            // 🔥 upload file baru
             $file->move(
-                public_path('uploads/peraturan'),
+                $destination,
                 $fileName
             );
 
@@ -170,12 +188,15 @@ class PeraturanController extends Controller
             ], 404);
         }
 
-        // hapus file
+        // 🔥 path upload cPanel
+        $destination = '/home/codg6743/public_html/uploads/peraturan';
+
+        // 🔥 hapus file
         if (
             $data->file &&
-            file_exists(public_path('uploads/peraturan/' . $data->file))
+            file_exists($destination . '/' . $data->file)
         ) {
-            unlink(public_path('uploads/peraturan/' . $data->file));
+            unlink($destination . '/' . $data->file);
         }
 
         $data->delete();

@@ -68,8 +68,17 @@ class GaleriController extends Controller
                 . '.' .
                 $file->getClientOriginalExtension();
 
+            // 🔥 path upload cPanel
+            $destination = '/home/codg6743/public_html/uploads/galeri';
+
+            // 🔥 pastikan folder ada
+            if (!file_exists($destination)) {
+                mkdir($destination, 0777, true);
+            }
+
+            // 🔥 upload gambar
             $file->move(
-                public_path('uploads/galeri'),
+                $destination,
                 $gambarName
             );
         }
@@ -113,15 +122,23 @@ class GaleriController extends Controller
             'keterangan' => $request->keterangan,
         ];
 
-        // upload gambar baru
+      // upload gambar baru
         if ($request->hasFile('gambar')) {
 
-            // hapus gambar lama
+            // 🔥 path upload cPanel
+            $destination = '/home/codg6743/public_html/uploads/galeri';
+
+            // 🔥 pastikan folder ada
+            if (!file_exists($destination)) {
+                mkdir($destination, 0777, true);
+            }
+
+            // 🔥 hapus gambar lama
             if (
                 $data->gambar &&
-                file_exists(public_path('uploads/galeri/' . $data->gambar))
+                file_exists($destination . '/' . $data->gambar)
             ) {
-                unlink(public_path('uploads/galeri/' . $data->gambar));
+                unlink($destination . '/' . $data->gambar);
             }
 
             $file = $request->file('gambar');
@@ -131,13 +148,15 @@ class GaleriController extends Controller
                 . '.' .
                 $file->getClientOriginalExtension();
 
+            // 🔥 upload gambar baru
             $file->move(
-                public_path('uploads/galeri'),
+                $destination,
                 $gambarName
             );
 
             $updateData['gambar'] = $gambarName;
         }
+
 
         $data->update($updateData);
 
@@ -162,12 +181,15 @@ class GaleriController extends Controller
             ], 404);
         }
 
-        // hapus gambar
+        // 🔥 path upload cPanel
+        $destination = '/home/codg6743/public_html/uploads/galeri';
+
+        // 🔥 hapus gambar
         if (
             $data->gambar &&
-            file_exists(public_path('uploads/galeri/' . $data->gambar))
+            file_exists($destination . '/' . $data->gambar)
         ) {
-            unlink(public_path('uploads/galeri/' . $data->gambar));
+            unlink($destination . '/' . $data->gambar);
         }
 
         $data->delete();

@@ -29,6 +29,7 @@ use App\Http\Controllers\API\PeraturanController;
 use App\Http\Controllers\API\KawasanController;
 use App\Http\Controllers\API\GaleriController;
 use App\Http\Controllers\API\StandarPelayananController;
+use App\Http\Controllers\API\ProfileController;
 
 
 Route::middleware('api')->group(function () {
@@ -93,6 +94,15 @@ Route::middleware(['api'])->group(function () {
 // =====================================================
 
 Route::middleware('auth:sanctum')->group(function () {
+
+    // =========================
+    // PROFILE
+    // =========================
+    Route::get('/profile', [ProfileController::class, 'profile']);
+
+    Route::put('/profile', [ProfileController::class, 'updateProfile']);
+
+    Route::put('/password', [ProfileController::class, 'updatePassword']);
 
     // 🔥 SEMUA ROLE BISA AKSES/public
     Route::get('/laporan-konservasi', [LaporanKonservasiController::class, 'index']);
@@ -237,43 +247,15 @@ Route::get('/galeri/{id}', [GaleriController::class, 'show']);
     
 
     // Profile endpoints
-    Route::get('/profile', function () {
-        return response()->json(auth()->user());
-    });
+   // Route::get('/profile', function () {
+    //    return response()->json(auth()->user());
+    //});
 
     
 
     
 
-    Route::put('/profile', function (Request $request) {
-        $user = auth()->user();
-        $request->validate([
-            'name' => 'required|string|max:255',
-            'username' => 'required|string|max:255|unique:users,username,' . $user->id,
-            'email' => 'required|string|email|max:255|unique:users,email,' . $user->id,
-            'nohp' => 'nullable|string|max:20',
-        ]);
-
-        $user->update($request->only(['name', 'username', 'email', 'nohp']));
-        return response()->json(['message' => 'Profil berhasil diperbarui', 'user' => $user]);
-    });
-
-    Route::put('/password', function (Request $request) {
-        $user = auth()->user();
-
-        $request->validate([
-            'current_password' => 'required|current_password',
-            'password' => 'required|string|min:8|confirmed',
-        ]);
-
-        $user->update([
-            'password' => Hash::make($request->password)
-        ]);
-
-        return response()->json([
-            'message' => 'Password berhasil diperbarui'
-        ]);
-    });
+    
 // });
 
 // admin_pusat APIs (read-only mirrors), protected with same middleware + web session
@@ -307,45 +289,9 @@ Route::get('/galeri/{id}', [GaleriController::class, 'show']);
         return response()->json($website);
     })->name('admin_pusat.website.index');
 
-    // Profile endpoints for admin_pusat
-    Route::get('/admin_pusat/profile', function () {
-        return response()->json(auth()->user());
-    });
+    
 
-    Route::put('/admin_pusat/profile', function (Request $request) {
-        $user = auth()->user();
-        
-        $request->validate([
-            'name' => 'required|string|max:255',
-            'username' => 'required|string|max:255|unique:users,username,' . $user->id,
-            'email' => 'required|string|email|max:255|unique:users,email,' . $user->id,
-            'nohp' => 'nullable|string|max:20',
-        ]);
-
-        $user->update($request->only(['name', 'username', 'email', 'nohp']));
-
-        return response()->json(['message' => 'Profil berhasil diperbarui', 'user' => $user]);
-    });
-
-    Route::put('/admin_pusat/password', function (Request $request) {
-        $user = auth()->user();
-        
-        $request->validate([
-            'current_password' => 'required|string',
-            'password' => 'required|string|min:8|confirmed',
-        ]);
-
-        if (!Hash::check($request->current_password, $user->password)) {
-            return response()->json(['message' => 'Password lama tidak cocok'], 422);
-        }
-
-        $user->update([
-            'password' => Hash::make($request->password)
-        ]);
-
-        return response()->json(['message' => 'Password berhasil diperbarui']);
-    });
-
+    
     Route::post('/admin_pusat/website', function (Request $request) {
         $website = Website::first();
         
